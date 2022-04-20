@@ -17,10 +17,22 @@
         android:theme="@style/AppTheme">
         <activity
             android:name=".AccountActivity"
-            android:exported="false" />
+            android:exported="false">
+            <intent-filter>
+                <action
+                    android:name="account"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+            </intent-filter>
+        </activity>
         <activity
             android:name=".SettingActivity"
-            android:exported="false" />
+            android:exported="false">
+            <intent-filter>
+                <action
+                    android:name="setting"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+            </intent-filter>
+        </activity>
         <activity
             android:name=".LoginActivity"
             android:exported="false" />

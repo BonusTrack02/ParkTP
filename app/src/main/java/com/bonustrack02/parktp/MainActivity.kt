@@ -2,6 +2,7 @@ package com.bonustrack02.parktp
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import androidx.core.view.get
 import androidx.fragment.app.Fragment
 import com.bonustrack02.parktp.databinding.ActivityMainBinding
 
@@ -15,8 +16,8 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(binding.root)
 
-        fragmentList.add(MapFragment())
         fragmentList.add(GraphFragment())
+        fragmentList.add(MapFragment())
         fragmentList.add(InfoFragment())
 
         supportFragmentManager.beginTransaction().add(R.id.container, fragmentList[0]).commit()
@@ -43,5 +44,7 @@ class MainActivity : AppCompatActivity() {
             tran.commit()
             true
         }
+
+        binding.bnv.selectedItemId = R.id.bnv_analytics
     }
 }
