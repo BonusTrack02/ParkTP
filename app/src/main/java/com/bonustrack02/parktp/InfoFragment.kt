@@ -7,7 +7,6 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.AdapterView
-import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import com.bonustrack02.parktp.databinding.FragmentInfoBinding
 
@@ -25,7 +24,7 @@ class InfoFragment : Fragment() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        infoItems.add(InfoItem("로그인한 계정 정보", R.drawable.ic_bnv_account_circle_24))
+        infoItems.add(InfoItem("로그인한 계정 정보", R.drawable.ic_account_circle_24))
         infoItems.add(InfoItem("푸시 알림 서비스 설정", R.drawable.ic_settings_24))
 
         val adapter = InfoAdapter(activity as Context, infoItems)

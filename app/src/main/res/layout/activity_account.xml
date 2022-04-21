@@ -6,9 +6,58 @@
     android:layout_height="match_parent"
     tools:context=".AccountActivity">
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="account activity"/>
+    <com.google.android.material.appbar.MaterialToolbar
+        android:id="@+id/toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="?attr/actionBarSize"
+        android:background="@color/md_theme_light_primary"
+        android:theme="@style/ToolbarStyle">
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="계정 정보"
+            android:textSize="18sp"
+            android:textColor="@color/white"/>
+    </com.google.android.material.appbar.MaterialToolbar>
+    
+    <com.google.android.material.card.MaterialCardView
+        android:layout_width="match_parent"
+        android:layout_height="60dp"
+        android:layout_below="@id/toolbar"
+        android:layout_margin="16dp">
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
 
+            <ImageView
+                android:id="@+id/account_img"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:layout_centerVertical="true"
+                android:src="@drawable/ic_launcher_foreground"/>
+
+            <TextView
+                android:id="@+id/account_text_id"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_toRightOf="@id/account_img"
+                android:layout_marginLeft="8dp"
+                android:layout_centerVertical="true"
+                android:text="아이디"/>
+
+            <TextView
+                android:id="@+id/account_text_type"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentRight="true"
+                android:layout_centerVertical="true"
+                android:layout_marginRight="8dp"
+                android:text="간편 로그인 계정 타입"/>
+
+        </RelativeLayout>
+
+    </com.google.android.material.card.MaterialCardView>
+
+
+    
 </RelativeLayout>

@@ -29,7 +29,7 @@ class InfoAdapter(var context: Context, var infoItems: MutableList<InfoItem>) : 
         }
 
         var listIcon = v!!.findViewById<ImageView>(R.id.list_icon)
-        var listTitle = v!!.findViewById<TextView>(R.id.list_title)
+        var listTitle = v.findViewById<TextView>(R.id.list_title)
 
         var infoItem = infoItems[p0]
         listIcon.setImageResource(infoItem.icon)
