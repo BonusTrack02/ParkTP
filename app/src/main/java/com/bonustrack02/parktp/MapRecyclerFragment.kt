@@ -37,8 +37,12 @@ class MapRecyclerFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        val ac = activity as MainActivity
         binding.fab.setOnClickListener {
+            val tran = ac.supportFragmentManager.beginTransaction()
 
+            tran.remove(this)
+            tran.commit()
         }
     }
 }
