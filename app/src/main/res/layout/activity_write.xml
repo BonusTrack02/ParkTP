@@ -29,6 +29,7 @@
         android:layout_height="wrap_content"
         android:padding="8dp"
         android:layout_below="@id/ratingbar"
+        android:gravity="top"
         android:hint="내용"
         app:counterEnabled="true"
         app:counterMaxLength="300">
