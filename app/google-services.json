@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "538246219623",
+    "project_id": "parktp",
+    "storage_bucket": "parktp.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:538246219623:android:695613738dd034f6ccd1c2",
+        "android_client_info": {
+          "package_name": "com.bonustrack02.parktp"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "538246219623-s90k04n9omit5dstq7lngsmkaa80b0pf.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.bonustrack02.parktp",
+            "certificate_hash": "241c649d0e305b9afdf014db710901f7f1297312"
+          }
+        },
+        {
+          "client_id": "538246219623-sgesc96f8r3g983s05767o3ia8qrn5ad.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDturkDj0V-TAFdg0KZ8sryvUDRt35zqkk"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "538246219623-sgesc96f8r3g983s05767o3ia8qrn5ad.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
