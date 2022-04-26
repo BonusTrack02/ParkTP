@@ -6,20 +6,37 @@
     android:layout_height="match_parent"
     tools:context=".WriteActivity">
 
+    <com.google.android.material.appbar.MaterialToolbar
+        android:id="@+id/toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="?attr/actionBarSize"
+        android:background="@color/md_theme_light_primary"
+        android:theme="@style/ToolbarStyle">
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="글쓰기"
+            android:textSize="18sp"
+            android:textColor="@color/white"/>
+    </com.google.android.material.appbar.MaterialToolbar>
+
     <TextView
         android:id="@+id/write_text_rating"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_margin="8dp"
+        android:layout_below="@id/toolbar"
         android:layout_alignParentLeft="true"
-        android:textSize="18sp"
-        android:text="별점 : "/>
+        android:layout_marginTop="24dp"
+        android:text="별점 : "
+        android:textSize="18sp" />
 
     <RatingBar
         android:id="@+id/ratingbar"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_toRightOf="@id/write_text_rating"
+        android:layout_below="@id/toolbar"
+        android:layout_marginTop="8dp"
         android:numStars="5"
         android:rating="3"
         android:stepSize="0.5"/>
@@ -28,6 +45,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:padding="8dp"
+        android:layout_margin="8dp"
         android:layout_below="@id/ratingbar"
         android:gravity="top"
         android:hint="내용"
@@ -43,6 +61,7 @@
     </com.google.android.material.textfield.TextInputLayout>
 
     <com.google.android.material.button.MaterialButton
+        android:id="@+id/write_btn_complete"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentRight="true"

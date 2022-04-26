@@ -28,7 +28,7 @@ class MapAdapter (val context : Context, var mapItems : MutableList<MapItem>) : 
         holder.recyclerTextConvenience.text = mapItem.convinience
 
         holder.itemView.setOnClickListener {
-            val intent = Intent(context, WriteActivity::class.java)
+            val intent = Intent(context, ParkDetailActivity::class.java)
 
             context.startActivity(intent)
         }

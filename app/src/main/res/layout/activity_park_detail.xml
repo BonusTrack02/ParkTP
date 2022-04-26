@@ -6,7 +6,30 @@
     android:layout_height="match_parent"
     tools:context=".ParkDetailActivity">
 
+    <com.google.android.material.appbar.MaterialToolbar
+        android:id="@+id/toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="?attr/actionBarSize"
+        android:background="@color/md_theme_light_primary"
+        android:theme="@style/ToolbarStyle">
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="해당 공원 이름"
+            android:textSize="18sp"
+            android:textColor="@color/white"/>
+    </com.google.android.material.appbar.MaterialToolbar>
+
+    <fragment
+        android:id="@+id/detail_map"
+        android:layout_width="match_parent"
+        android:layout_height="200dp"
+        android:layout_below="@id/toolbar"
+        android:name="com.google.android.gms.maps.SupportMapFragment"
+        android:layout_margin="8dp"/>
+
     <com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
+        android:id="@+id/fab"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
