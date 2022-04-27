@@ -21,6 +21,28 @@
             app:cfl_border="true"
             app:cfl_border_width="4dp"/>
 
+        <com.akexorcist.roundcornerprogressbar.TextRoundCornerProgressBar
+            android:id="@+id/progressbar"
+            android:layout_width="320dp"
+            android:layout_height="wrap_content"
+            android:layout_centerHorizontal="true"
+            android:layout_below="@id/graph_water"
+            android:layout_marginTop="24dp"
+            app:rcAnimationEnable="true"
+            app:rcBackgroundColor="@color/md_theme_light_primaryContainer"
+            app:rcProgressColor="@color/md_theme_light_primary"
+            app:rcProgress="30"
+            app:rcReverse="false"
+            app:rcTextProgress="30"/>
+
+        <com.google.android.material.textview.MaterialTextView
+            android:id="@+id/graph_text_xp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/progressbar"
+            android:layout_alignLeft="@id/progressbar"
+            android:layout_marginTop="8dp"
+            android:text="다음 레벨까지 남은 경험치 : "/>
     </RelativeLayout>
 
 </androidx.core.widget.NestedScrollView>

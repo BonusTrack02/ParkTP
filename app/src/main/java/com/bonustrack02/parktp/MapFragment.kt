@@ -24,53 +24,11 @@ import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.BitmapDescriptorFactory
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.MarkerOptions
+import com.google.android.libraries.places.api.Places
 
 class MapFragment : Fragment() {
 
     val binding : FragmentMapBinding by lazy { FragmentMapBinding.inflate(layoutInflater) }
-    var lat : Double = 0.0
-    var lng : Double = 0.0
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-
-        val fragmentManager : FragmentManager = requireActivity().supportFragmentManager
-        val mapFragment : SupportMapFragment? = fragmentManager.findFragmentById(R.id.gmap) as? SupportMapFragment
-
-        var permissions : MutableList<String> = mutableListOf(Manifest.permission.ACCESS_FINE_LOCATION)
-        if (requireContext().checkSelfPermission(permissions[0]) == PackageManager.PERMISSION_DENIED) {
-            requestPermissions(permissions.toTypedArray(), 100)
-        }
-
-        providerClient = LocationServices.getFusedLocationProviderClient(activity as MainActivity)
-        val locationRequest = LocationRequest.create()
-        locationRequest.priority = LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY
-        locationRequest.interval = 3000
-
-        providerClient.requestLocationUpdates(locationRequest, locationCallback, Looper.getMainLooper())
-
-        mapFragment?.getMapAsync(object : OnMapReadyCallback {
-            @SuppressLint("MissingPermission")
-            override fun onMapReady(p0: GoogleMap) {
-                var myLocation = LatLng(lat, lng)
-                Log.i("latlng", "$lat , $lng")
-                p0.moveCamera(CameraUpdateFactory.newLatLngZoom(myLocation, 16f))
-
-                var marker = MarkerOptions()
-                marker.title("내 위치")
-                marker.position(myLocation)
-                marker.icon(BitmapDescriptorFactory.fromResource(R.drawable.ic_place_24))
-                marker.anchor(0.5f, 1.5f)
-
-                p0.addMarker(marker)
-
-                val settings = p0.uiSettings
-                settings.isZoomControlsEnabled = true
-                p0.isMyLocationEnabled = true
-            }
-        })
-
-    }
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -81,10 +39,16 @@ class MapFragment : Fragment() {
     }
 
     lateinit var providerClient : FusedLocationProviderClient
+    var lat : Double = 0.0
+    var lng : Double = 0.0
+    var parkMarkers : MutableList<LatLng> = mutableListOf()
 
     @SuppressLint("MissingPermission")
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+        val fragmentManager : FragmentManager = childFragmentManager
+        val mapFragment : SupportMapFragment? = fragmentManager.findFragmentById(R.id.gmap) as? SupportMapFragment
 
         val ac = activity as MainActivity
         binding.fab.setOnClickListener {
@@ -95,6 +59,26 @@ class MapFragment : Fragment() {
             tran.add(R.id.container, mapRecyclerFragment)
             tran.addToBackStack(null)
             tran.commit()
+        }
+
+        /////Retrofit
+        val retrofit = RetrofitHelper.getInstance()
+        val retrofitService = retrofit.create(RetrofitService::class.java)
+        //val call = retrofitService.getParkJson("KakaoAK ${R.string.kakao_rest_key}", "공원", )
+
+        providerClient = LocationServices.getFusedLocationProviderClient(activity as MainActivity)
+        val locationRequest = LocationRequest.create()
+        locationRequest.priority = LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY
+        locationRequest.interval = 3000
+
+        providerClient.requestLocationUpdates(locationRequest, locationCallback, Looper.getMainLooper())
+
+        mapFragment!!.getMapAsync { p0 ->
+            var myLocation = LatLng(lat, lng)
+            Log.i("latlng", "$lat , $lng")
+            p0.moveCamera(CameraUpdateFactory.newLatLngZoom(myLocation, 16f))
+
+            p0.isMyLocationEnabled = true
         }
     }
 
@@ -111,6 +95,6 @@ class MapFragment : Fragment() {
     override fun onPause() {
         super.onPause()
 
-        if (providerClient != null) providerClient.removeLocationUpdates(locationCallback)
+        providerClient.removeLocationUpdates(locationCallback)
     }
 }
