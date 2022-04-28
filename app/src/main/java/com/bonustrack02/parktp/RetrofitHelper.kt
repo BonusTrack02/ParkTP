@@ -8,7 +8,7 @@ open class RetrofitHelper {
     companion object {
         fun getInstance(): Retrofit {
             val builder = Retrofit.Builder()
-            builder.baseUrl("https://dapi.kakao.com/v2/local/search/keyword.json")
+            builder.baseUrl("https://dapi.kakao.com")
             builder.addConverterFactory(GsonConverterFactory.create())
             val retrofit = builder.build()
 

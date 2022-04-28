@@ -8,17 +8,19 @@ import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.os.Message
+import android.util.Log
 import com.bonustrack02.parktp.databinding.ActivitySplashBinding
 
 class SplashActivity : AppCompatActivity() {
 
     private val binding : ActivitySplashBinding by lazy { ActivitySplashBinding.inflate(layoutInflater) }
 
+    var permissions : MutableList<String> = mutableListOf(Manifest.permission.ACCESS_FINE_LOCATION)
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(binding.root)
 
-        var permissions : MutableList<String> = mutableListOf(Manifest.permission.ACCESS_FINE_LOCATION)
         if (checkSelfPermission(permissions[0]) == PackageManager.PERMISSION_DENIED) {
             requestPermissions(permissions.toTypedArray(), 100)
         } else {
@@ -44,6 +46,8 @@ class SplashActivity : AppCompatActivity() {
         if (requestCode == 100 && grantResults[0] == PackageManager.PERMISSION_DENIED) {
             handler.removeMessages(0)
             finish()
+        } else if (requestCode == 100 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+            handler.sendEmptyMessageDelayed(0, 2000)
         }
     }
 }

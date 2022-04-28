@@ -1,5 +1,8 @@
 package com.bonustrack02.parktp
 
-class G {
-
+open class G {
+    companion object {
+        open var lat : Double = 0.0
+        open var lng : Double = 0.0
+    }
 }

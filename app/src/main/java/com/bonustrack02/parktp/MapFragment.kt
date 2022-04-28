@@ -12,9 +12,12 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.core.app.ActivityCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
+import com.bonustrack02.parktp.G.Companion.lat
+import com.bonustrack02.parktp.G.Companion.lng
 import com.bonustrack02.parktp.databinding.FragmentMapBinding
 import com.google.android.gms.location.*
 import com.google.android.gms.maps.CameraUpdateFactory
@@ -24,7 +27,11 @@ import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.BitmapDescriptorFactory
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.MarkerOptions
-import com.google.android.libraries.places.api.Places
+import retrofit2.Call
+import retrofit2.Callback
+import retrofit2.Response
+import retrofit2.Retrofit
+import retrofit2.converter.scalars.ScalarsConverterFactory
 
 class MapFragment : Fragment() {
 
@@ -38,10 +45,8 @@ class MapFragment : Fragment() {
         return binding.root
     }
 
-    lateinit var providerClient : FusedLocationProviderClient
-    var lat : Double = 0.0
-    var lng : Double = 0.0
-    var parkMarkers : MutableList<LatLng> = mutableListOf()
+    var markers : MutableList<MarkerOptions> = mutableListOf()
+    var googleMap:GoogleMap? = null
 
     @SuppressLint("MissingPermission")
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -61,40 +66,45 @@ class MapFragment : Fragment() {
             tran.commit()
         }
 
-        /////Retrofit
+        ////////Retrofit//////////////////////
         val retrofit = RetrofitHelper.getInstance()
         val retrofitService = retrofit.create(RetrofitService::class.java)
-        //val call = retrofitService.getParkJson("KakaoAK ${R.string.kakao_rest_key}", "공원", )
+        val defaultLat = "37.566285"
+        val defaultLng = "126.977949"
+        val kakaoKey = resources.getString(R.string.kakao_rest_key)
+        val call = retrofitService.getParkJson("KakaoAK $kakaoKey", "공원", defaultLat, defaultLng, "10000")
+        call.enqueue(object : Callback<ResponseItem> {
+            override fun onResponse(call: Call<ResponseItem>, response: Response<ResponseItem>) {
+                var responseItem : ResponseItem? = response.body()
+                Log.i("Response", responseItem?.documents?.size.toString())
+                for (i in 0 until (responseItem?.documents?.size!!)) {
+                    if (responseItem?.documents[i].category_name.contains("공원")) {
+                        markers.add(MarkerOptions()
+                            .title(responseItem.documents[i].place_name)
+                            .position(LatLng(responseItem.documents[i].y.toDouble(), responseItem.documents[i].x.toDouble()))
+                            .icon(BitmapDescriptorFactory.fromResource(R.drawable.ic_place2))
+                            .anchor(0.5f, 1.5f)
+                        )
+                    }
+                }
+                markers.forEach {
+                    googleMap?.addMarker(it)
+                }
+            }
 
-        providerClient = LocationServices.getFusedLocationProviderClient(activity as MainActivity)
-        val locationRequest = LocationRequest.create()
-        locationRequest.priority = LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY
-        locationRequest.interval = 3000
-
-        providerClient.requestLocationUpdates(locationRequest, locationCallback, Looper.getMainLooper())
+            override fun onFailure(call: Call<ResponseItem>, t: Throwable) {
+                Log.e("Retrofit error", t.message.toString())
+            }
+        })
+        ////////////////////////////////////////
 
         mapFragment!!.getMapAsync { p0 ->
+            googleMap = p0
             var myLocation = LatLng(lat, lng)
             Log.i("latlng", "$lat , $lng")
             p0.moveCamera(CameraUpdateFactory.newLatLngZoom(myLocation, 16f))
 
             p0.isMyLocationEnabled = true
         }
-    }
-
-    val locationCallback : LocationCallback = object : LocationCallback() {
-        override fun onLocationResult(p0: LocationResult) {
-            super.onLocationResult(p0)
-
-            val location : Location = p0.lastLocation
-            lat = location.latitude
-            lng = location.longitude
-        }
-    }
-
-    override fun onPause() {
-        super.onPause()
-
-        providerClient.removeLocationUpdates(locationCallback)
     }
 }

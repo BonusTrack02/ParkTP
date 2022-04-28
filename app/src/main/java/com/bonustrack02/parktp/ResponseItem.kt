@@ -2,16 +2,16 @@ package com.bonustrack02.parktp
 
 data class ResponseItem(var meta : MetaClass, var documents : MutableList<Item>)
 
-data class MetaClass(var pageableCount : Int, var totalCount : Int, var isEnd : Boolean)
+data class MetaClass(var pageable_count : Int, var total_count : Int, var is_end : Boolean)
 
-data class Item(var placeName : String,
+data class Item(var place_name : String,
                 var distance : String,
-                var placeUrl : String,
-                var categoryName : String,
-                var addressName : String,
-                var roadAddressName : String,
+                var place_url : String,
+                var category_name : String,
+                var address_name : String,
+                var road_address_name : String,
                 var phone : String,
-                var categoryGroupName : String,
+                var category_group_name : String,
                 var x : String,
                 var y : String
                 )
