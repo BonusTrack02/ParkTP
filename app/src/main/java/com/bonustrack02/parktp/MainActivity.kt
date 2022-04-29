@@ -18,6 +18,7 @@ class MainActivity : AppCompatActivity() {
 
     val fragmentList : MutableList<Fragment> = mutableListOf()
     lateinit var providerClient : FusedLocationProviderClient
+    val locationRequest = LocationRequest.create()
 
     @SuppressLint("MissingPermission")
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -56,9 +57,7 @@ class MainActivity : AppCompatActivity() {
         binding.bnv.selectedItemId = R.id.bnv_analytics
 
         providerClient = LocationServices.getFusedLocationProviderClient(this)
-        val locationRequest = LocationRequest.create()
         locationRequest.priority = LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY
-        locationRequest.interval = 5000
 
         providerClient.requestLocationUpdates(locationRequest, locationCallback, Looper.getMainLooper())
     }

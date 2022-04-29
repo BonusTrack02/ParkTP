@@ -3,7 +3,7 @@ package com.bonustrack02.parktp
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 
-open class RetrofitHelper {
+class RetrofitHelper {
 
     companion object {
         fun getInstance(): Retrofit {

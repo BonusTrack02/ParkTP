@@ -43,6 +43,14 @@
             android:layout_alignLeft="@id/progressbar"
             android:layout_marginTop="8dp"
             android:text="다음 레벨까지 남은 경험치 : "/>
+
+        <com.kizitonwose.calendarview.CalendarView
+            android:id="@+id/calendar_view"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/graph_text_xp"
+            app:cv_dayViewResource="@layout/calendar_day_layout"
+            app:cv_maxRowCount="5"/>
     </RelativeLayout>
 
 </androidx.core.widget.NestedScrollView>

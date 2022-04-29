@@ -17,6 +17,7 @@
         <entry key="app/src/main/res/layout/activity_setting.xml" value="0.29739583333333336" />
         <entry key="app/src/main/res/layout/activity_splash.xml" value="0.29739583333333336" />
         <entry key="app/src/main/res/layout/activity_write.xml" value="0.26944444444444443" />
+        <entry key="app/src/main/res/layout/calendar_day_layout.xml" value="0.146875" />
         <entry key="app/src/main/res/layout/fragment_gmap.xml" value="0.29739583333333336" />
         <entry key="app/src/main/res/layout/fragment_graph.xml" value="0.29739583333333336" />
         <entry key="app/src/main/res/layout/fragment_info.xml" value="0.29739583333333336" />

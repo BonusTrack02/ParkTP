@@ -15,13 +15,13 @@
             android:text="공원 이름"/>
 
         <com.google.android.material.textview.MaterialTextView
-            android:id="@+id/recycler_text_convenience"
+            android:id="@+id/recycler_text_distance"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_below="@id/recycler_text_name"
             android:layout_marginTop="16dp"
             android:layout_alignLeft="@id/recycler_text_name"
-            android:text="편의시설 유무"/>
+            android:text="현재 지점부터의 거리"/>
 
     </RelativeLayout>
 

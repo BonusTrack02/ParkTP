@@ -66,19 +66,37 @@ class MapFragment : Fragment() {
             tran.commit()
         }
 
+        mapFragment!!.getMapAsync { p0 ->
+            googleMap = p0
+            var myLocation = LatLng(lat, lng)
+            Log.i("latlng", "$lat , $lng")
+            p0.moveCamera(CameraUpdateFactory.newLatLngZoom(myLocation, 16f))
+
+            p0.isMyLocationEnabled = true
+            p0.setOnMyLocationButtonClickListener {
+                val mainActivity = activity as MainActivity
+                mainActivity.providerClient.requestLocationUpdates(
+                    mainActivity.locationRequest,
+                    mainActivity.locationCallback,
+                    Looper.getMainLooper()
+                )
+                p0.moveCamera(CameraUpdateFactory.newLatLngZoom(LatLng(lat, lng), 16f))
+
+                false
+            }
+        }
+
         ////////Retrofit//////////////////////
         val retrofit = RetrofitHelper.getInstance()
         val retrofitService = retrofit.create(RetrofitService::class.java)
-        val defaultLat = "37.566285"
-        val defaultLng = "126.977949"
         val kakaoKey = resources.getString(R.string.kakao_rest_key)
-        val call = retrofitService.getParkJson("KakaoAK $kakaoKey", "공원", defaultLat, defaultLng, "10000")
+        val call = retrofitService.getParkJson("KakaoAK $kakaoKey", "공원", "$lng", "$lat", "10000")
         call.enqueue(object : Callback<ResponseItem> {
             override fun onResponse(call: Call<ResponseItem>, response: Response<ResponseItem>) {
                 var responseItem : ResponseItem? = response.body()
                 Log.i("Response", responseItem?.documents?.size.toString())
                 for (i in 0 until (responseItem?.documents?.size!!)) {
-                    if (responseItem?.documents[i].category_name.contains("공원")) {
+                    if (responseItem.documents[i].category_name.contains("공원")) {
                         markers.add(MarkerOptions()
                             .title(responseItem.documents[i].place_name)
                             .position(LatLng(responseItem.documents[i].y.toDouble(), responseItem.documents[i].x.toDouble()))
@@ -97,14 +115,5 @@ class MapFragment : Fragment() {
             }
         })
         ////////////////////////////////////////
-
-        mapFragment!!.getMapAsync { p0 ->
-            googleMap = p0
-            var myLocation = LatLng(lat, lng)
-            Log.i("latlng", "$lat , $lng")
-            p0.moveCamera(CameraUpdateFactory.newLatLngZoom(myLocation, 16f))
-
-            p0.isMyLocationEnabled = true
-        }
     }
 }

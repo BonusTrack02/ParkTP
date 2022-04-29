@@ -11,11 +11,10 @@ import com.bonustrack02.parktp.databinding.FragmentRecyclerMapBinding
 class MapRecyclerFragment : Fragment() {
     val binding : FragmentRecyclerMapBinding by lazy { FragmentRecyclerMapBinding.inflate(layoutInflater) }
 
-    var mapItems = mutableListOf<MapItem>()
+    var mapItems = mutableListOf<ResponseItem>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        mapItems.add(MapItem("서울숲", "편의점 있음. 공중화장실 있음"))
 
         binding.recycler.adapter = MapAdapter(requireContext(), mapItems)
     }
@@ -44,5 +43,7 @@ class MapRecyclerFragment : Fragment() {
             tran.remove(this)
             tran.commit()
         }
+
+
     }
 }
