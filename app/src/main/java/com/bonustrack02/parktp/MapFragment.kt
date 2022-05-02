@@ -26,6 +26,7 @@ import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.BitmapDescriptorFactory
 import com.google.android.gms.maps.model.LatLng
+import com.google.android.gms.maps.model.Marker
 import com.google.android.gms.maps.model.MarkerOptions
 import retrofit2.Call
 import retrofit2.Callback
@@ -45,7 +46,7 @@ class MapFragment : Fragment() {
         return binding.root
     }
 
-    var markers : MutableList<MarkerOptions> = mutableListOf()
+    var markers : MutableList<Marker> = mutableListOf()
     var googleMap:GoogleMap? = null
 
     @SuppressLint("MissingPermission")
@@ -97,16 +98,14 @@ class MapFragment : Fragment() {
                 Log.i("Response", responseItem?.documents?.size.toString())
                 for (i in 0 until (responseItem?.documents?.size!!)) {
                     if (responseItem.documents[i].category_name.contains("공원")) {
-                        markers.add(MarkerOptions()
-                            .title(responseItem.documents[i].place_name)
-                            .position(LatLng(responseItem.documents[i].y.toDouble(), responseItem.documents[i].x.toDouble()))
-                            .icon(BitmapDescriptorFactory.fromResource(R.drawable.ic_place2))
-                            .anchor(0.5f, 1.5f)
+                        markers.add(
+                            googleMap?.addMarker(MarkerOptions()
+                                    .title(responseItem.documents[i].place_name)
+                                    .position(LatLng(responseItem.documents[i].y.toDouble(), responseItem.documents[i].x.toDouble()))
+                                    .icon(BitmapDescriptorFactory.fromResource(R.drawable.ic_place2))
+                                    .anchor(0.5f, 1.5f))!!
                         )
                     }
-                }
-                markers.forEach {
-                    googleMap?.addMarker(it)
                 }
             }
 
