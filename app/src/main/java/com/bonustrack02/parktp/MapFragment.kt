@@ -116,4 +116,26 @@ class MapFragment : Fragment() {
         })
         ////////////////////////////////////////
     }
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+
+        binding.adView.setClientId("DAN-4U3grIhtKKHbIuAm")
+        binding.adView.loadAd()
+    }
+
+    override fun onPause() {
+        super.onPause()
+        binding.adView.pause()
+    }
+
+    override fun onResume() {
+        super.onResume()
+        binding.adView.resume()
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        binding.adView.destroy()
+    }
 }
