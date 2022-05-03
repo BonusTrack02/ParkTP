@@ -46,6 +46,7 @@ class MapFragment : Fragment() {
 
     var markers : MutableList<Marker> = mutableListOf()
     var googleMap:GoogleMap? = null
+    var responseItem : ResponseItem? = null
 
     @SuppressLint("MissingPermission")
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -85,6 +86,7 @@ class MapFragment : Fragment() {
                         )
                     }
                 }
+                this@MapFragment.responseItem = responseItem
             }
 
             override fun onFailure(call: Call<ResponseItem>, t: Throwable) {
@@ -128,6 +130,7 @@ class MapFragment : Fragment() {
                                 )
                             }
                         }
+                        this@MapFragment.responseItem = responseItem
                     }
 
                     override fun onFailure(call: Call<ResponseItem>, t: Throwable) {
