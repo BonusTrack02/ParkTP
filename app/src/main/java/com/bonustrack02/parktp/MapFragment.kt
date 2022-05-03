@@ -31,8 +31,6 @@ import com.google.android.gms.maps.model.MarkerOptions
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
-import retrofit2.Retrofit
-import retrofit2.converter.scalars.ScalarsConverterFactory
 
 class MapFragment : Fragment() {
 
@@ -67,6 +65,34 @@ class MapFragment : Fragment() {
             tran.commit()
         }
 
+        ////////Retrofit//////////////////////
+        val retrofit = RetrofitHelper.getInstance()
+        val retrofitService = retrofit.create(RetrofitService::class.java)
+        val kakaoKey = resources.getString(R.string.kakao_rest_key)
+        val call = retrofitService.getParkJson("KakaoAK $kakaoKey", "공원", "$lng", "$lat", "10000")
+        call.enqueue(object : Callback<ResponseItem> {
+            override fun onResponse(call: Call<ResponseItem>, response: Response<ResponseItem>) {
+                var responseItem : ResponseItem? = response.body()
+                Log.i("Response", responseItem?.documents?.size.toString())
+                for (i in 0 until (responseItem?.documents?.size!!)) {
+                    if (responseItem.documents[i].category_name.contains("공원")) {
+                        markers.add(
+                            googleMap?.addMarker(MarkerOptions()
+                                .title(responseItem.documents[i].place_name)
+                                .position(LatLng(responseItem.documents[i].y.toDouble(), responseItem.documents[i].x.toDouble()))
+                                .icon(BitmapDescriptorFactory.fromResource(R.drawable.ic_place2))
+                                .anchor(0.5f, 1.5f))!!
+                        )
+                    }
+                }
+            }
+
+            override fun onFailure(call: Call<ResponseItem>, t: Throwable) {
+                Log.e("Retrofit error", t.message.toString())
+            }
+        })
+        ////////////////////////////////////////
+
         mapFragment!!.getMapAsync { p0 ->
             googleMap = p0
             var myLocation = LatLng(lat, lng)
@@ -82,38 +108,36 @@ class MapFragment : Fragment() {
                     Looper.getMainLooper()
                 )
                 p0.moveCamera(CameraUpdateFactory.newLatLngZoom(LatLng(lat, lng), 16f))
+                for (marker in markers) {
+                    marker.remove()
+                }
+                markers.clear()
+
+                call.enqueue(object : Callback<ResponseItem> {
+                    override fun onResponse(call: Call<ResponseItem>, response: Response<ResponseItem>) {
+                        var responseItem : ResponseItem? = response.body()
+                        Log.i("Response", responseItem?.documents?.size.toString())
+                        for (i in 0 until (responseItem?.documents?.size!!)) {
+                            if (responseItem.documents[i].category_name.contains("공원")) {
+                                markers.add(
+                                    googleMap?.addMarker(MarkerOptions()
+                                        .title(responseItem.documents[i].place_name)
+                                        .position(LatLng(responseItem.documents[i].y.toDouble(), responseItem.documents[i].x.toDouble()))
+                                        .icon(BitmapDescriptorFactory.fromResource(R.drawable.ic_place2))
+                                        .anchor(0.5f, 1.5f))!!
+                                )
+                            }
+                        }
+                    }
+
+                    override fun onFailure(call: Call<ResponseItem>, t: Throwable) {
+                        Log.e("Retrofit error", t.message.toString())
+                    }
+                })
 
                 false
             }
         }
-
-        ////////Retrofit//////////////////////
-        val retrofit = RetrofitHelper.getInstance()
-        val retrofitService = retrofit.create(RetrofitService::class.java)
-        val kakaoKey = resources.getString(R.string.kakao_rest_key)
-        val call = retrofitService.getParkJson("KakaoAK $kakaoKey", "공원", "$lng", "$lat", "10000")
-        call.enqueue(object : Callback<ResponseItem> {
-            override fun onResponse(call: Call<ResponseItem>, response: Response<ResponseItem>) {
-                var responseItem : ResponseItem? = response.body()
-                Log.i("Response", responseItem?.documents?.size.toString())
-                for (i in 0 until (responseItem?.documents?.size!!)) {
-                    if (responseItem.documents[i].category_name.contains("공원")) {
-                        markers.add(
-                            googleMap?.addMarker(MarkerOptions()
-                                    .title(responseItem.documents[i].place_name)
-                                    .position(LatLng(responseItem.documents[i].y.toDouble(), responseItem.documents[i].x.toDouble()))
-                                    .icon(BitmapDescriptorFactory.fromResource(R.drawable.ic_place2))
-                                    .anchor(0.5f, 1.5f))!!
-                        )
-                    }
-                }
-            }
-
-            override fun onFailure(call: Call<ResponseItem>, t: Throwable) {
-                Log.e("Retrofit error", t.message.toString())
-            }
-        })
-        ////////////////////////////////////////
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
