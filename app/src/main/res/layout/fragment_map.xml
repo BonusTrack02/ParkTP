@@ -10,7 +10,7 @@
         android:layout_height="wrap_content"
         android:src="@drawable/ic_list_24"
         android:layout_alignParentRight="true"
-        android:layout_alignParentBottom="true"
+        android:layout_above="@id/ad_view"
         android:layout_margin="16dp"/>
 
     <fragment

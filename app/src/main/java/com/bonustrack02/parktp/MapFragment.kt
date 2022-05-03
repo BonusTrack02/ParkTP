@@ -113,7 +113,7 @@ class MapFragment : Fragment() {
                 }
                 markers.clear()
 
-                call.enqueue(object : Callback<ResponseItem> {
+                call.clone().enqueue(object : Callback<ResponseItem> {
                     override fun onResponse(call: Call<ResponseItem>, response: Response<ResponseItem>) {
                         var responseItem : ResponseItem? = response.body()
                         Log.i("Response", responseItem?.documents?.size.toString())
