@@ -15,14 +15,15 @@ class SplashActivity : AppCompatActivity() {
 
     private val binding : ActivitySplashBinding by lazy { ActivitySplashBinding.inflate(layoutInflater) }
 
-    var permissions : MutableList<String> = mutableListOf(Manifest.permission.ACCESS_FINE_LOCATION)
+    var permissions : Array<String> = arrayOf(Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.WRITE_EXTERNAL_STORAGE)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(binding.root)
 
-        if (checkSelfPermission(permissions[0]) == PackageManager.PERMISSION_DENIED) {
-            requestPermissions(permissions.toTypedArray(), 100)
+        if (checkSelfPermission(permissions[0]) == PackageManager.PERMISSION_DENIED
+            || checkSelfPermission(permissions[1]) == PackageManager.PERMISSION_DENIED) {
+            requestPermissions(permissions, 100)
         } else {
             handler.sendEmptyMessageDelayed(0, 2000)
         }
@@ -43,11 +44,17 @@ class SplashActivity : AppCompatActivity() {
     ) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
 
-        if (requestCode == 100 && grantResults[0] == PackageManager.PERMISSION_DENIED) {
-            handler.removeMessages(0)
-            finish()
-        } else if (requestCode == 100 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-            handler.sendEmptyMessageDelayed(0, 2000)
+        if (requestCode == 100) {
+            if (grantResults.isNotEmpty()) {
+                for (result in grantResults) {
+                    if (result == PackageManager.PERMISSION_DENIED) {
+                        handler.removeMessages(0)
+                        finish()
+                    } else if (result == PackageManager.PERMISSION_GRANTED) {
+                        handler.sendEmptyMessageDelayed(0, 2000)
+                    }
+                }
+            }
         }
     }
 }

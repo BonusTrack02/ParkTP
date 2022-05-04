@@ -32,6 +32,8 @@ class ParkDetailActivity : AppCompatActivity() {
         mapFragment.getMapAsync {
             it.moveCamera(CameraUpdateFactory.newLatLngZoom(LatLng(parkLat, parkLng), 18f))
 
+            it.uiSettings.isZoomControlsEnabled = true
+
             val markerOptions = MarkerOptions()
             binding.toolbarTitle.text = intent.getStringExtra("title")
             markerOptions.title(intent.getStringExtra("title"))

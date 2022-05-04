@@ -71,16 +71,30 @@
         android:gravity="top"
         android:hint="내용"
         app:counterEnabled="true"
-        app:counterMaxLength="300">
+        app:counterMaxLength="500">
 
         <com.google.android.material.textfield.TextInputEditText
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:inputType="textMultiLine"
-            android:maxLines="6"
-            android:lines="6"
-            android:maxLength="300"/>
+            android:maxLines="8"
+            android:lines="8"
+            android:maxLength="500"/>
     </com.google.android.material.textfield.TextInputLayout>
+
+    <com.google.android.material.divider.MaterialDivider
+        android:id="@+id/divider"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/textfield_content"/>
+
+    <com.google.android.material.textview.MaterialTextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="첫 번째 사진이 썸네일로 업로드됩니다"
+        android:padding="8dp"
+        android:gravity="center_horizontal"
+        android:layout_below="@id/divider"/>
 
     <ImageView
         android:id="@+id/write_img_add1"
