@@ -21,10 +21,13 @@ class MapRecyclerFragment : Fragment() {
         mainActivity.getMapFragmentMarkers()
 
         binding.recycler.adapter = MapAdapter(requireContext(), mainActivity.getMapFragmentResponseItem())
+        binding.adView.setClientId("DAN-4U3grIhtKKHbIuAm")
+        binding.adView.loadAd()
     }
 
     override fun onResume() {
         super.onResume()
+        binding.adView.resume()
 
         binding.recycler.adapter?.notifyDataSetChanged()
     }
@@ -47,7 +50,15 @@ class MapRecyclerFragment : Fragment() {
             tran.remove(this)
             tran.commit()
         }
+    }
 
+    override fun onPause() {
+        super.onPause()
+        binding.adView.pause()
+    }
 
+    override fun onDestroy() {
+        super.onDestroy()
+        binding.adView.destroy()
     }
 }

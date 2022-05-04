@@ -28,6 +28,12 @@
         android:name="com.google.android.gms.maps.SupportMapFragment"
         android:layout_margin="8dp"/>
 
+    <androidx.recyclerview.widget.RecyclerView
+        android:layout_width="match_parent"
+        android:layout_height="320dp"
+        android:layout_below="@id/detail_map"
+        android:layout_margin="8dp"/>
+
     <com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
         android:id="@+id/fab"
         android:layout_width="wrap_content"

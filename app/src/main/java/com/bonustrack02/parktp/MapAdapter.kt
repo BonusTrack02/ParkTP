@@ -28,6 +28,9 @@ class MapAdapter (val context : Context, var responseItem: ResponseItem) : Recyc
 
         holder.itemView.setOnClickListener {
             val intent = Intent(context, ParkDetailActivity::class.java)
+            intent.putExtra("title", responseItem.documents[position].place_name)
+            intent.putExtra("position_lat", responseItem.documents[position].y)
+            intent.putExtra("position_lng", responseItem.documents[position].x)
 
             context.startActivity(intent)
         }
