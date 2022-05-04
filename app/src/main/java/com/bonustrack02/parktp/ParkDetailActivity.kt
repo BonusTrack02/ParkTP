@@ -33,6 +33,7 @@ class ParkDetailActivity : AppCompatActivity() {
             it.moveCamera(CameraUpdateFactory.newLatLngZoom(LatLng(parkLat, parkLng), 18f))
 
             val markerOptions = MarkerOptions()
+            binding.toolbarTitle.text = intent.getStringExtra("title")
             markerOptions.title(intent.getStringExtra("title"))
             markerOptions.position(
                 LatLng(intent.getStringExtra("position_lat")!!.toDouble(),
