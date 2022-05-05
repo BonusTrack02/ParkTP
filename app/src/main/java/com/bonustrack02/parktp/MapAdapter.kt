@@ -31,6 +31,7 @@ class MapAdapter (val context : Context, var responseItem: ResponseItem) : Recyc
             intent.putExtra("title", responseItem.documents[position].place_name)
             intent.putExtra("position_lat", responseItem.documents[position].y)
             intent.putExtra("position_lng", responseItem.documents[position].x)
+            intent.putExtra("id", responseItem.documents[position].id)
 
             context.startActivity(intent)
         }

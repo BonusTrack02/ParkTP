@@ -55,6 +55,7 @@
         app:counterMaxLength="50">
 
         <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/edit_title"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:inputType="text"
@@ -74,6 +75,7 @@
         app:counterMaxLength="500">
 
         <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/edit_content"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:inputType="textMultiLine"

@@ -28,6 +28,7 @@ class ParkDetailActivity : AppCompatActivity() {
 
         val parkLat = intent.getStringExtra("position_lat")!!.toDouble()
         val parkLng = intent.getStringExtra("position_lng")!!.toDouble()
+        val id = intent.getStringExtra("id")
 
         mapFragment.getMapAsync {
             it.moveCamera(CameraUpdateFactory.newLatLngZoom(LatLng(parkLat, parkLng), 18f))
@@ -48,6 +49,7 @@ class ParkDetailActivity : AppCompatActivity() {
 
         binding.fab.setOnClickListener {
             val intent = Intent(this, WriteActivity::class.java)
+            intent.putExtra("id", id)
             startActivity(intent)
         }
     }
