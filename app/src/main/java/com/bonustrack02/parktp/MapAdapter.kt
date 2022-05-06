@@ -8,7 +8,7 @@ import android.view.ViewGroup
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 
-class MapAdapter (val context : Context, var mapItems : MutableList<ResponseItem>) : RecyclerView.Adapter<MapAdapter.ViewHolder>() {
+class MapAdapter (val context : Context, var responseItem: ResponseItem) : RecyclerView.Adapter<MapAdapter.ViewHolder>() {
 
     inner class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         val recyclerTextName : TextView by lazy { itemView.findViewById(R.id.recycler_text_name) }
@@ -22,17 +22,20 @@ class MapAdapter (val context : Context, var mapItems : MutableList<ResponseItem
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        val responseItem = mapItems[position]
 
         holder.recyclerTextName.text = responseItem.documents[position].place_name
         holder.recyclerTextDistance.text = "${responseItem.documents[position].distance}m"
 
         holder.itemView.setOnClickListener {
             val intent = Intent(context, ParkDetailActivity::class.java)
+            intent.putExtra("title", responseItem.documents[position].place_name)
+            intent.putExtra("position_lat", responseItem.documents[position].y)
+            intent.putExtra("position_lng", responseItem.documents[position].x)
+            intent.putExtra("id", responseItem.documents[position].id)
 
             context.startActivity(intent)
         }
     }
 
-    override fun getItemCount(): Int = mapItems.size
+    override fun getItemCount(): Int = responseItem.documents.size
 }

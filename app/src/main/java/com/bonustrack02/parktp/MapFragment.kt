@@ -26,12 +26,11 @@ import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.BitmapDescriptorFactory
 import com.google.android.gms.maps.model.LatLng
+import com.google.android.gms.maps.model.Marker
 import com.google.android.gms.maps.model.MarkerOptions
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
-import retrofit2.Retrofit
-import retrofit2.converter.scalars.ScalarsConverterFactory
 
 class MapFragment : Fragment() {
 
@@ -45,8 +44,12 @@ class MapFragment : Fragment() {
         return binding.root
     }
 
-    var markers : MutableList<MarkerOptions> = mutableListOf()
+    var markers : MutableList<Marker> = mutableListOf()
     var googleMap:GoogleMap? = null
+    var responseItem : ResponseItem? = null
+
+    var lastLat = lat
+    var lastLng = lng
 
     @SuppressLint("MissingPermission")
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -65,6 +68,7 @@ class MapFragment : Fragment() {
             tran.addToBackStack(null)
             tran.commit()
         }
+        loadDataAndAddMarkers()
 
         mapFragment!!.getMapAsync { p0 ->
             googleMap = p0
@@ -77,43 +81,92 @@ class MapFragment : Fragment() {
                 val mainActivity = activity as MainActivity
                 mainActivity.providerClient.requestLocationUpdates(
                     mainActivity.locationRequest,
-                    mainActivity.locationCallback,
+                    locationCallback,
                     Looper.getMainLooper()
                 )
-                p0.moveCamera(CameraUpdateFactory.newLatLngZoom(LatLng(lat, lng), 16f))
 
                 false
             }
         }
+    }
 
-        ////////Retrofit//////////////////////
+    val locationCallback : LocationCallback = object : LocationCallback() {
+        override fun onLocationResult(p0: LocationResult) {
+            super.onLocationResult(p0)
+
+            val location : Location = p0.lastLocation
+            G.lat = location.latitude
+            G.lng = location.longitude
+
+            if (lastLat == lat && lastLng == lng) {
+                for (marker in markers) {
+                    marker.remove()
+                }
+                markers.clear()
+
+                loadDataAndAddMarkers()
+            } else {
+                googleMap?.moveCamera(CameraUpdateFactory.newLatLngZoom(LatLng(lat, lng), 16f))
+                for (marker in markers) {
+                    marker.remove()
+                }
+                markers.clear()
+
+                loadDataAndAddMarkers()
+            }
+        }
+    }
+
+    private fun loadDataAndAddMarkers() {
         val retrofit = RetrofitHelper.getInstance()
         val retrofitService = retrofit.create(RetrofitService::class.java)
         val kakaoKey = resources.getString(R.string.kakao_rest_key)
         val call = retrofitService.getParkJson("KakaoAK $kakaoKey", "공원", "$lng", "$lat", "10000")
+        Log.i("latlng", "$lat  $lng")
         call.enqueue(object : Callback<ResponseItem> {
             override fun onResponse(call: Call<ResponseItem>, response: Response<ResponseItem>) {
                 var responseItem : ResponseItem? = response.body()
                 Log.i("Response", responseItem?.documents?.size.toString())
                 for (i in 0 until (responseItem?.documents?.size!!)) {
                     if (responseItem.documents[i].category_name.contains("공원")) {
-                        markers.add(MarkerOptions()
-                            .title(responseItem.documents[i].place_name)
-                            .position(LatLng(responseItem.documents[i].y.toDouble(), responseItem.documents[i].x.toDouble()))
-                            .icon(BitmapDescriptorFactory.fromResource(R.drawable.ic_place2))
-                            .anchor(0.5f, 1.5f)
+                        markers.add(
+                            googleMap?.addMarker(MarkerOptions()
+                                .title(responseItem.documents[i].place_name)
+                                .position(LatLng(responseItem.documents[i].y.toDouble(), responseItem.documents[i].x.toDouble()))
+                                .icon(BitmapDescriptorFactory.fromResource(R.drawable.ic_place2))
+                                .anchor(0.5f, 1.5f))!!
                         )
+                        Log.i("retrofit place name", responseItem.documents[i].place_name)
                     }
                 }
-                markers.forEach {
-                    googleMap?.addMarker(it)
-                }
+                this@MapFragment.responseItem = responseItem
             }
 
             override fun onFailure(call: Call<ResponseItem>, t: Throwable) {
                 Log.e("Retrofit error", t.message.toString())
             }
         })
-        ////////////////////////////////////////
+    }
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+
+        binding.adView.setClientId("DAN-4U3grIhtKKHbIuAm")
+        binding.adView.loadAd()
+    }
+
+    override fun onPause() {
+        super.onPause()
+        binding.adView.pause()
+    }
+
+    override fun onResume() {
+        super.onResume()
+        binding.adView.resume()
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        binding.adView.destroy()
     }
 }

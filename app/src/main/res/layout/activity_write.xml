@@ -20,12 +20,13 @@
             android:textColor="@color/white"/>
     </com.google.android.material.appbar.MaterialToolbar>
 
-    <TextView
+    <com.google.android.material.textview.MaterialTextView
         android:id="@+id/write_text_rating"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_below="@id/toolbar"
         android:layout_alignParentLeft="true"
+        android:layout_marginLeft="16dp"
         android:layout_marginTop="24dp"
         android:text="별점 : "
         android:textSize="18sp" />
@@ -34,31 +35,88 @@
         android:id="@+id/ratingbar"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_toRightOf="@id/write_text_rating"
         android:layout_below="@id/toolbar"
         android:layout_marginTop="8dp"
+        android:layout_toRightOf="@id/write_text_rating"
         android:numStars="5"
         android:rating="3"
-        android:stepSize="0.5"/>
+        android:stepSize="0.5" />
 
     <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/textfield_title"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:padding="8dp"
         android:layout_margin="8dp"
         android:layout_below="@id/ratingbar"
         android:gravity="top"
-        android:hint="내용"
+        android:hint="제목"
         app:counterEnabled="true"
-        app:counterMaxLength="300">
+        app:counterMaxLength="50">
 
         <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/edit_title"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:inputType="text"
+            android:maxLength="50"/>
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/textfield_content"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="8dp"
+        android:layout_margin="8dp"
+        android:layout_below="@id/textfield_title"
+        android:gravity="top"
+        android:hint="내용"
+        app:counterEnabled="true"
+        app:counterMaxLength="500">
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/edit_content"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:inputType="textMultiLine"
-            android:maxLines="6"
-            android:lines="6"/>
+            android:maxLines="8"
+            android:lines="8"
+            android:maxLength="500"/>
     </com.google.android.material.textfield.TextInputLayout>
+
+    <com.google.android.material.divider.MaterialDivider
+        android:id="@+id/divider"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/textfield_content"/>
+
+    <com.google.android.material.textview.MaterialTextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="첫 번째 사진이 썸네일로 업로드됩니다"
+        android:padding="8dp"
+        android:gravity="center_horizontal"
+        android:layout_below="@id/divider"/>
+
+    <ImageView
+        android:id="@+id/write_img_add1"
+        android:layout_width="120dp"
+        android:layout_height="120dp"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentLeft="true"
+        android:layout_marginLeft="16dp"
+        android:layout_marginBottom="24dp"
+        android:src="@drawable/ic_add_a_photo_24"/>
+
+    <ImageView
+        android:id="@+id/write_img_add2"
+        android:layout_width="120dp"
+        android:layout_height="120dp"
+        android:layout_alignParentBottom="true"
+        android:layout_toRightOf="@id/write_img_add1"
+        android:layout_marginLeft="8dp"
+        android:layout_marginBottom="24dp"
+        android:src="@drawable/ic_add_a_photo_24"/>
 
     <com.google.android.material.button.MaterialButton
         android:id="@+id/write_btn_complete"

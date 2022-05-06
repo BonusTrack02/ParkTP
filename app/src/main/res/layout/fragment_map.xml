@@ -10,7 +10,7 @@
         android:layout_height="wrap_content"
         android:src="@drawable/ic_list_24"
         android:layout_alignParentRight="true"
-        android:layout_alignParentBottom="true"
+        android:layout_above="@id/ad_view"
         android:layout_margin="16dp"/>
 
     <fragment
@@ -18,5 +18,12 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:name="com.google.android.gms.maps.SupportMapFragment"/>
+
+    <com.kakao.adfit.ads.ba.BannerAdView
+        android:id="@+id/ad_view"
+        android:layout_width="match_parent"
+        android:layout_height="60dp"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"/>
 
 </RelativeLayout>

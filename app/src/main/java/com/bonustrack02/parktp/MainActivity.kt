@@ -10,6 +10,7 @@ import androidx.core.view.get
 import androidx.fragment.app.Fragment
 import com.bonustrack02.parktp.databinding.ActivityMainBinding
 import com.google.android.gms.location.*
+import com.google.android.gms.maps.model.Marker
 import java.util.*
 
 class MainActivity : AppCompatActivity() {
@@ -70,6 +71,14 @@ class MainActivity : AppCompatActivity() {
             G.lat = location.latitude
             G.lng = location.longitude
         }
+    }
+
+    fun getMapFragmentMarkers() : MutableList<Marker> {
+        return (fragmentList[1] as MapFragment).markers
+    }
+
+    fun getMapFragmentResponseItem() : ResponseItem {
+        return (fragmentList[1] as MapFragment).responseItem!!
     }
 
     var wasPressed = false
