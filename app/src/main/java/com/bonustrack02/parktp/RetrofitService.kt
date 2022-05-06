@@ -1,9 +1,7 @@
 package com.bonustrack02.parktp
 
 import retrofit2.Call
-import retrofit2.http.GET
-import retrofit2.http.Header
-import retrofit2.http.Query
+import retrofit2.http.*
 
 interface RetrofitService {
     @GET("/v2/local/search/keyword.json")
@@ -20,4 +18,8 @@ interface RetrofitService {
                        @Query("x") x : String,
                        @Query("y") y : String,
                        @Query("radius") radius : String) : Call<String>
+
+    @Multipart
+    @POST("/ParkTP/uploadReview.php")
+    fun postReviewToServer(@PartMap dataPart : Map<String, String>) : Call<String>
 }
