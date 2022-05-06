@@ -48,6 +48,9 @@ class MapFragment : Fragment() {
     var googleMap:GoogleMap? = null
     var responseItem : ResponseItem? = null
 
+    var lastLat = lat
+    var lastLng = lng
+
     @SuppressLint("MissingPermission")
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -65,12 +68,61 @@ class MapFragment : Fragment() {
             tran.addToBackStack(null)
             tran.commit()
         }
+        loadDataAndAddMarkers()
 
-        ////////Retrofit//////////////////////
+        mapFragment!!.getMapAsync { p0 ->
+            googleMap = p0
+            var myLocation = LatLng(lat, lng)
+            Log.i("latlng", "$lat , $lng")
+            p0.moveCamera(CameraUpdateFactory.newLatLngZoom(myLocation, 16f))
+
+            p0.isMyLocationEnabled = true
+            p0.setOnMyLocationButtonClickListener {
+                val mainActivity = activity as MainActivity
+                mainActivity.providerClient.requestLocationUpdates(
+                    mainActivity.locationRequest,
+                    locationCallback,
+                    Looper.getMainLooper()
+                )
+
+                false
+            }
+        }
+    }
+
+    val locationCallback : LocationCallback = object : LocationCallback() {
+        override fun onLocationResult(p0: LocationResult) {
+            super.onLocationResult(p0)
+
+            val location : Location = p0.lastLocation
+            G.lat = location.latitude
+            G.lng = location.longitude
+
+            if (lastLat == lat && lastLng == lng) {
+                for (marker in markers) {
+                    marker.remove()
+                }
+                markers.clear()
+
+                loadDataAndAddMarkers()
+            } else {
+                googleMap?.moveCamera(CameraUpdateFactory.newLatLngZoom(LatLng(lat, lng), 16f))
+                for (marker in markers) {
+                    marker.remove()
+                }
+                markers.clear()
+
+                loadDataAndAddMarkers()
+            }
+        }
+    }
+
+    private fun loadDataAndAddMarkers() {
         val retrofit = RetrofitHelper.getInstance()
         val retrofitService = retrofit.create(RetrofitService::class.java)
         val kakaoKey = resources.getString(R.string.kakao_rest_key)
         val call = retrofitService.getParkJson("KakaoAK $kakaoKey", "공원", "$lng", "$lat", "10000")
+        Log.i("latlng", "$lat  $lng")
         call.enqueue(object : Callback<ResponseItem> {
             override fun onResponse(call: Call<ResponseItem>, response: Response<ResponseItem>) {
                 var responseItem : ResponseItem? = response.body()
@@ -84,6 +136,7 @@ class MapFragment : Fragment() {
                                 .icon(BitmapDescriptorFactory.fromResource(R.drawable.ic_place2))
                                 .anchor(0.5f, 1.5f))!!
                         )
+                        Log.i("retrofit place name", responseItem.documents[i].place_name)
                     }
                 }
                 this@MapFragment.responseItem = responseItem
@@ -93,54 +146,6 @@ class MapFragment : Fragment() {
                 Log.e("Retrofit error", t.message.toString())
             }
         })
-        ////////////////////////////////////////
-
-        mapFragment!!.getMapAsync { p0 ->
-            googleMap = p0
-            var myLocation = LatLng(lat, lng)
-            Log.i("latlng", "$lat , $lng")
-            p0.moveCamera(CameraUpdateFactory.newLatLngZoom(myLocation, 16f))
-
-            p0.isMyLocationEnabled = true
-            p0.setOnMyLocationButtonClickListener {
-                val mainActivity = activity as MainActivity
-                mainActivity.providerClient.requestLocationUpdates(
-                    mainActivity.locationRequest,
-                    mainActivity.locationCallback,
-                    Looper.getMainLooper()
-                )
-                p0.moveCamera(CameraUpdateFactory.newLatLngZoom(LatLng(lat, lng), 16f))
-                for (marker in markers) {
-                    marker.remove()
-                }
-                markers.clear()
-
-                call.clone().enqueue(object : Callback<ResponseItem> {
-                    override fun onResponse(call: Call<ResponseItem>, response: Response<ResponseItem>) {
-                        var responseItem : ResponseItem? = response.body()
-                        Log.i("Response", responseItem?.documents?.size.toString())
-                        for (i in 0 until (responseItem?.documents?.size!!)) {
-                            if (responseItem.documents[i].category_name.contains("공원")) {
-                                markers.add(
-                                    googleMap?.addMarker(MarkerOptions()
-                                        .title(responseItem.documents[i].place_name)
-                                        .position(LatLng(responseItem.documents[i].y.toDouble(), responseItem.documents[i].x.toDouble()))
-                                        .icon(BitmapDescriptorFactory.fromResource(R.drawable.ic_place2))
-                                        .anchor(0.5f, 1.5f))!!
-                                )
-                            }
-                        }
-                        this@MapFragment.responseItem = responseItem
-                    }
-
-                    override fun onFailure(call: Call<ResponseItem>, t: Throwable) {
-                        Log.e("Retrofit error", t.message.toString())
-                    }
-                })
-
-                false
-            }
-        }
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
