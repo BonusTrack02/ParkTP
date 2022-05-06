@@ -15,9 +15,14 @@ import androidx.loader.content.CursorLoader
 import com.bonustrack02.parktp.databinding.ActivityWriteBinding
 import com.bumptech.glide.Glide
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.google.android.material.snackbar.Snackbar
 import com.google.firebase.storage.FirebaseStorage
+import retrofit2.Call
+import retrofit2.Callback
+import retrofit2.Response
 import java.text.SimpleDateFormat
 import java.util.*
+import kotlin.collections.HashMap
 
 class WriteActivity : AppCompatActivity() {
     val binding : ActivityWriteBinding by lazy { ActivityWriteBinding.inflate(layoutInflater) }
@@ -36,8 +41,12 @@ class WriteActivity : AppCompatActivity() {
                 .setTitle("글 작성 확인")
                 .setMessage("이대로 업로드하시겠습니까?")
                 .setPositiveButton("예", DialogInterface.OnClickListener { dialogInterface, i ->
-                    uploadImages()
-                    uploadReview()
+                    if (imgUri1 == null && imgUri2 == null) {
+                        uploadReview()
+                    } else {
+                        uploadImages()
+                        uploadReview()
+                    }
                     finish()
                 })
                 .setNegativeButton("아니오", DialogInterface.OnClickListener { dialogInterface, i -> })
@@ -77,8 +86,8 @@ class WriteActivity : AppCompatActivity() {
             } else return@ActivityResultCallback
         })
 
-    lateinit var imgUri1 : Uri
-    lateinit var imgUri2 : Uri
+    var imgUri1 : Uri? = null
+    var imgUri2 : Uri? = null
 
     private fun uploadImages() {
         val firebaseStorage = FirebaseStorage.getInstance()
@@ -92,12 +101,12 @@ class WriteActivity : AppCompatActivity() {
         var imgRef1 = firebaseStorage.getReference("uploads/$fileName1")
         var imgRef2 = firebaseStorage.getReference("uploads/$fileName2")
 
-        var uploadTask = imgRef1.putFile(imgUri1)
+        var uploadTask = imgRef1.putFile(imgUri1!!)
         uploadTask.addOnSuccessListener {
             Log.i("upload", "upload success1")
         }
 
-        var uploadTask2 = imgRef2.putFile(imgUri2)
+        var uploadTask2 = imgRef2.putFile(imgUri2!!)
         uploadTask2.addOnSuccessListener {
             Log.i("upload", "upload success2")
         }
@@ -107,7 +116,27 @@ class WriteActivity : AppCompatActivity() {
         val id = intent.getStringExtra("id")
         val title = binding.editTitle.text.toString()
         val content = binding.editContent.text.toString()
-        val rating : Float = binding.ratingbar.rating
+        val rating = binding.ratingbar.rating.toString()
+
+        val dataPart = HashMap<String, String>()
+        if (id != null) dataPart["id"] = id
+        dataPart["title"] = title
+        dataPart["content"] = content
+        dataPart["rating"] = rating
+
+        val retrofitService = RetrofitHelper.getScalarsInstance().create(RetrofitService::class.java)
+        val call = retrofitService.postReviewToServer(dataPart)
+        call.enqueue(object : Callback<String> {
+            override fun onResponse(call: Call<String>, response: Response<String>) {
+                val s = response.body()
+                Log.i("response", "" + s)
+            }
+
+            override fun onFailure(call: Call<String>, t: Throwable) {
+                Toast.makeText(this@WriteActivity, "error" + t.message, Toast.LENGTH_SHORT).show()
+            }
+
+        })
     }
 
     override fun onSupportNavigateUp(): Boolean {

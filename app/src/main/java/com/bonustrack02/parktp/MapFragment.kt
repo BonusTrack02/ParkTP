@@ -126,19 +126,24 @@ class MapFragment : Fragment() {
         call.enqueue(object : Callback<ResponseItem> {
             override fun onResponse(call: Call<ResponseItem>, response: Response<ResponseItem>) {
                 var responseItem : ResponseItem? = response.body()
+                if (response.body() == null) return
                 Log.i("Response", responseItem?.documents?.size.toString())
-                for (i in 0 until (responseItem?.documents?.size!!)) {
-                    if (responseItem.documents[i].category_name.contains("공원")) {
-                        markers.add(
-                            googleMap?.addMarker(MarkerOptions()
-                                .title(responseItem.documents[i].place_name)
-                                .position(LatLng(responseItem.documents[i].y.toDouble(), responseItem.documents[i].x.toDouble()))
-                                .icon(BitmapDescriptorFactory.fromResource(R.drawable.ic_place2))
-                                .anchor(0.5f, 1.5f))!!
-                        )
-                        Log.i("retrofit place name", responseItem.documents[i].place_name)
+                val size = responseItem?.documents?.size
+                if (size != null) {
+                    for (i in 0 until size) {
+                        if (responseItem?.documents?.get(i)?.category_name?.contains("공원")!!) {
+                            markers.add(
+                                googleMap?.addMarker(MarkerOptions()
+                                    .title(responseItem.documents[i].place_name)
+                                    .position(LatLng(responseItem.documents[i].y.toDouble(), responseItem.documents[i].x.toDouble()))
+                                    .icon(BitmapDescriptorFactory.fromResource(R.drawable.ic_place2))
+                                    .anchor(0.5f, 1.5f))!!
+                            )
+                            Log.i("retrofit place name", responseItem.documents[i].place_name)
+                        }
                     }
-                }
+                } else return
+
                 this@MapFragment.responseItem = responseItem
             }
 
