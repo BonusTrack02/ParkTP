@@ -16,6 +16,7 @@ import com.bonustrack02.parktp.databinding.ActivityWriteBinding
 import com.bumptech.glide.Glide
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.snackbar.Snackbar
+import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.storage.FirebaseStorage
 import retrofit2.Call
 import retrofit2.Callback
@@ -91,38 +92,58 @@ class WriteActivity : AppCompatActivity() {
 
     private fun uploadImages() {
         val firebaseStorage = FirebaseStorage.getInstance()
+        val rootRef = firebaseStorage.reference
 
-        val sdf1 = SimpleDateFormat("yyyy-MM-dd-hh-mm-ss.SS")
-        val fileName1 = "IMG_${sdf1.format(Date())}-1.png"
+        if (imgUri1 != null) {
+            val sdf1 = SimpleDateFormat("yyyy-MM-dd-hh-mm-ss.SS")
+            val fileName1 = "IMG_${sdf1.format(Date())}-1.png"
 
-        val sdf2 = SimpleDateFormat("yyyy-MM-dd-hh-mm-ss.SS")
-        val fileName2 = "IMG_${sdf2.format(Date())}-2.png"
-
-        var imgRef1 = firebaseStorage.getReference("uploads/$fileName1")
-        var imgRef2 = firebaseStorage.getReference("uploads/$fileName2")
-
-        var uploadTask = imgRef1.putFile(imgUri1!!)
-        uploadTask.addOnSuccessListener {
-            Log.i("upload", "upload success1")
+            var imgRef1 = firebaseStorage.getReference("uploads/$fileName1")
+            var uploadTask = imgRef1.putFile(imgUri1!!)
+            uploadTask.addOnSuccessListener {
+                Log.i("upload", "upload success1")
+                val img1Ref = rootRef.child("uploads/$fileName1")
+                img1Ref.downloadUrl.addOnSuccessListener {
+                    img01 = it.toString()
+                }
+            }
         }
 
-        var uploadTask2 = imgRef2.putFile(imgUri2!!)
-        uploadTask2.addOnSuccessListener {
-            Log.i("upload", "upload success2")
+        if (imgUri2 != null) {
+            val sdf2 = SimpleDateFormat("yyyy-MM-dd-hh-mm-ss.SS")
+            val fileName2 = "IMG_${sdf2.format(Date())}-2.png"
+
+            var imgRef2 = firebaseStorage.getReference("uploads/$fileName2")
+            var uploadTask2 = imgRef2.putFile(imgUri2!!)
+            uploadTask2.addOnSuccessListener {
+                Log.i("upload", "upload success2")
+                val img2Ref = rootRef.child("uploads/$fileName2")
+                img2Ref.downloadUrl.addOnSuccessListener {
+                    img02 = it.toString()
+                }
+            }
         }
     }
 
+    lateinit var img01 : String
+    lateinit var img02 : String
+    val firebaseAuth = FirebaseAuth.getInstance()
+
     private fun uploadReview() {
-        val id = intent.getStringExtra("id")
+        val park_id = intent.getStringExtra("id")
         val title = binding.editTitle.text.toString()
         val content = binding.editContent.text.toString()
         val rating = binding.ratingbar.rating.toString()
+        val user_id = firebaseAuth.currentUser?.email.toString()
 
         val dataPart = HashMap<String, String>()
-        if (id != null) dataPart["id"] = id
+        if (park_id != null) dataPart["park_id"] = park_id
         dataPart["title"] = title
         dataPart["content"] = content
         dataPart["rating"] = rating
+        dataPart["img01"] = img01
+        dataPart["img02"] = img02
+        dataPart["user_id"] = user_id
 
         val retrofitService = RetrofitHelper.getScalarsInstance().create(RetrofitService::class.java)
         val call = retrofitService.postReviewToServer(dataPart)

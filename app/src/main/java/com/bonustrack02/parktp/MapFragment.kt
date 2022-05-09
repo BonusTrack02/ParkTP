@@ -13,6 +13,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
+import androidx.appcompat.app.AlertDialog
 import androidx.core.app.ActivityCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
@@ -104,7 +105,7 @@ class MapFragment : Fragment() {
                 }
                 markers.clear()
 
-                loadDataAndAddMarkers()
+                AddMarkersScalars()
             } else {
                 googleMap?.moveCamera(CameraUpdateFactory.newLatLngZoom(LatLng(lat, lng), 16f))
                 for (marker in markers) {
@@ -112,7 +113,7 @@ class MapFragment : Fragment() {
                 }
                 markers.clear()
 
-                loadDataAndAddMarkers()
+                AddMarkersScalars()
             }
         }
     }
@@ -121,6 +122,8 @@ class MapFragment : Fragment() {
         val retrofit = RetrofitHelper.getInstance()
         val retrofitService = retrofit.create(RetrofitService::class.java)
         val kakaoKey = resources.getString(R.string.kakao_rest_key)
+        Toast.makeText(requireContext(), "$lng", Toast.LENGTH_SHORT).show()
+        Toast.makeText(requireContext(), "$lat", Toast.LENGTH_SHORT).show()
         val call = retrofitService.getParkJson("KakaoAK $kakaoKey", "공원", "$lng", "$lat", "10000")
         Log.i("latlng", "$lat  $lng")
         call.enqueue(object : Callback<ResponseItem> {
@@ -151,6 +154,31 @@ class MapFragment : Fragment() {
                 Log.e("Retrofit error", t.message.toString())
             }
         })
+    }
+
+    private fun AddMarkersScalars() {
+        val retrofit = RetrofitHelper.getScalarsInstanceForTest()
+        val retrofitService = retrofit.create(RetrofitService::class.java)
+        val kakaoKey = resources.getString(R.string.kakao_rest_key)
+        val call = retrofitService.getScalarsJson("KakaoAK $kakaoKey", "공원", "$lng", "$lat", "10000")
+        call.enqueue(object : Callback<String> {
+            override fun onResponse(call: Call<String>, response: Response<String>) {
+                var responseItem : String?
+                if (response.body() == null) {
+                    responseItem = response.errorBody().toString()
+                } else {
+                    responseItem = response.body()
+                }
+                val builder = AlertDialog.Builder(requireContext())
+                builder.setMessage(responseItem).create().show()
+            }
+
+            override fun onFailure(call: Call<String>, t: Throwable) {
+                Toast.makeText(requireContext(), t.message, Toast.LENGTH_SHORT).show()
+            }
+
+        })
+
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
