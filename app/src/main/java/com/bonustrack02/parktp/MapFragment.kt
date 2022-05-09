@@ -172,28 +172,10 @@ class MapFragment : Fragment() {
                     responseItem = response.errorBody().toString()
                 } else {
                     responseItem = response.body()
-                    var item = Gson().fromJson(responseItem, ResponseItem::class.java)
-
-                    val size = item?.documents?.size
-                    if (size != null) {
-                        for (i in 0 until size) {
-                            if (item?.documents?.get(i)?.category_name?.contains("공원")!!) {
-                                markers.add(
-                                    googleMap?.addMarker(MarkerOptions()
-                                        .title(item.documents[i].place_name)
-                                        .position(LatLng(item.documents[i].y.toDouble(), item.documents[i].x.toDouble()))
-                                        .icon(BitmapDescriptorFactory.fromResource(R.drawable.ic_place2))
-                                        .anchor(0.5f, 1.5f))!!
-                                )
-                                Log.i("retrofit place name", item.documents[i].place_name)
-                            }
-                        }
-                    } else return
-
-                    this@MapFragment.responseItem = item
                 }
+
                 val builder = AlertDialog.Builder(requireContext())
-                builder.setMessage(responseItem).create().show()
+                builder.setMessage("$responseItem").create().show()
             }
 
             override fun onFailure(call: Call<String>, t: Throwable) {

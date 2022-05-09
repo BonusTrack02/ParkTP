@@ -42,12 +42,7 @@ class WriteActivity : AppCompatActivity() {
                 .setTitle("글 작성 확인")
                 .setMessage("이대로 업로드하시겠습니까?")
                 .setPositiveButton("예", DialogInterface.OnClickListener { dialogInterface, i ->
-                    if (imgUri1 == null && imgUri2 == null) {
-                        uploadReview()
-                    } else {
-                        uploadImages()
-                        uploadReview()
-                    }
+                    uploadReview()
                     finish()
                 })
                 .setNegativeButton("아니오", DialogInterface.OnClickListener { dialogInterface, i -> })
@@ -92,9 +87,26 @@ class WriteActivity : AppCompatActivity() {
             } else return@ActivityResultCallback
         })
 
-    private fun uploadImages() {
+    lateinit var img01 : String
+    lateinit var img02 : String
+    val firebaseAuth = FirebaseAuth.getInstance()
+
+    private fun uploadReview() {
         val firebaseStorage = FirebaseStorage.getInstance()
         val rootRef = firebaseStorage.reference
+
+        val park_id = intent.getStringExtra("id")
+        val title = binding.editTitle.text.toString()
+        val content = binding.editContent.text.toString()
+        val rating = binding.ratingbar.rating.toString()
+        val user_id = firebaseAuth.currentUser?.email.toString()
+
+        val dataPart = HashMap<String, String>()
+        if (park_id != null) dataPart["park_id"] = park_id
+        dataPart["title"] = title
+        dataPart["content"] = content
+        dataPart["rating"] = rating
+        dataPart["user_id"] = user_id
 
         if (imgUri1 != null) {
             val sdf1 = SimpleDateFormat("yyyy-MM-dd-hh-mm-ss.SS")
@@ -108,6 +120,7 @@ class WriteActivity : AppCompatActivity() {
                 val img1Ref = rootRef.child("uploads/$fileName1")
                 img1Ref.downloadUrl.addOnSuccessListener {
                     img01 = it.toString()
+                    dataPart["img01"] = img01
                 }
             }
         }
@@ -124,44 +137,25 @@ class WriteActivity : AppCompatActivity() {
                 val img2Ref = rootRef.child("uploads/$fileName2")
                 img2Ref.downloadUrl.addOnSuccessListener {
                     img02 = it.toString()
+                    dataPart["img02"] = img02
                 }
             }
         }
-    }
 
-    lateinit var img01 : String
-    lateinit var img02 : String
-    val firebaseAuth = FirebaseAuth.getInstance()
+        if (img01 != null || img02 != null) {
+            val retrofitService = RetrofitHelper.getScalarsInstance().create(RetrofitService::class.java)
+            val call = retrofitService.postReviewToServer(dataPart)
+            call.enqueue(object : Callback<String> {
+                override fun onResponse(call: Call<String>, response: Response<String>) {
+                    val s = response.body()
+                    Log.i("response", "" + s)
+                }
 
-    private fun uploadReview() {
-        val park_id = intent.getStringExtra("id")
-        val title = binding.editTitle.text.toString()
-        val content = binding.editContent.text.toString()
-        val rating = binding.ratingbar.rating.toString()
-        val user_id = firebaseAuth.currentUser?.email.toString()
-
-        val dataPart = HashMap<String, String>()
-        if (park_id != null) dataPart["park_id"] = park_id
-        dataPart["title"] = title
-        dataPart["content"] = content
-        dataPart["rating"] = rating
-        dataPart["img01"] = img01
-        dataPart["img02"] = img02
-        dataPart["user_id"] = user_id
-
-        val retrofitService = RetrofitHelper.getScalarsInstance().create(RetrofitService::class.java)
-        val call = retrofitService.postReviewToServer(dataPart)
-        call.enqueue(object : Callback<String> {
-            override fun onResponse(call: Call<String>, response: Response<String>) {
-                val s = response.body()
-                Log.i("response", "" + s)
-            }
-
-            override fun onFailure(call: Call<String>, t: Throwable) {
-                Toast.makeText(this@WriteActivity, "error" + t.message, Toast.LENGTH_SHORT).show()
-            }
-
-        })
+                override fun onFailure(call: Call<String>, t: Throwable) {
+                    Toast.makeText(this@WriteActivity, "error" + t.message, Toast.LENGTH_SHORT).show()
+                }
+            })
+        }
     }
 
     override fun onSupportNavigateUp(): Boolean {
