@@ -58,6 +58,9 @@ class WriteActivity : AppCompatActivity() {
         binding.writeImgAdd2.setOnClickListener { selectImage2() }
     }
 
+    var imgUri1 : Uri? = null
+    var imgUri2 : Uri? = null
+
     private fun selectImage1() {
         val intent = Intent(Intent.ACTION_PICK)
         intent.type = "image/*"
@@ -69,6 +72,7 @@ class WriteActivity : AppCompatActivity() {
         if (result.resultCode == RESULT_OK) {
             imgUri1 = result.data!!.data!!
             Glide.with(this).load(imgUri1).into(binding.writeImgAdd1)
+            Log.i("imgUri", imgUri1.toString())
         } else return@ActivityResultCallback
     })
 
@@ -84,11 +88,9 @@ class WriteActivity : AppCompatActivity() {
                 imgUri2 = result.data!!.data!!
                 Log.i("Uri", imgUri2.toString())
                 Glide.with(this).load(imgUri2).into(binding.writeImgAdd2)
+                Log.i("imgUri", imgUri2.toString())
             } else return@ActivityResultCallback
         })
-
-    var imgUri1 : Uri? = null
-    var imgUri2 : Uri? = null
 
     private fun uploadImages() {
         val firebaseStorage = FirebaseStorage.getInstance()
@@ -100,6 +102,7 @@ class WriteActivity : AppCompatActivity() {
 
             var imgRef1 = firebaseStorage.getReference("uploads/$fileName1")
             var uploadTask = imgRef1.putFile(imgUri1!!)
+            Log.i("imgUpload", "uploading")
             uploadTask.addOnSuccessListener {
                 Log.i("upload", "upload success1")
                 val img1Ref = rootRef.child("uploads/$fileName1")
@@ -115,6 +118,7 @@ class WriteActivity : AppCompatActivity() {
 
             var imgRef2 = firebaseStorage.getReference("uploads/$fileName2")
             var uploadTask2 = imgRef2.putFile(imgUri2!!)
+            Log.i("imgUpload", "uploading")
             uploadTask2.addOnSuccessListener {
                 Log.i("upload", "upload success2")
                 val img2Ref = rootRef.child("uploads/$fileName2")

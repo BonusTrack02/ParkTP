@@ -70,6 +70,7 @@ class MainActivity : AppCompatActivity() {
             val location : Location = p0.lastLocation
             G.lat = location.latitude
             G.lng = location.longitude
+            providerClient.removeLocationUpdates(this)
         }
     }
 
