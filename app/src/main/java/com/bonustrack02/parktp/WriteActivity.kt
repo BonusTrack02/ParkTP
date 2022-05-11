@@ -18,6 +18,7 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.snackbar.Snackbar
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.storage.FirebaseStorage
+import gun0912.tedimagepicker.builder.TedImagePicker
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -27,6 +28,7 @@ import kotlin.collections.HashMap
 
 class WriteActivity : AppCompatActivity() {
     val binding : ActivityWriteBinding by lazy { ActivityWriteBinding.inflate(layoutInflater) }
+    var selectedUriList : List<Uri>? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -49,46 +51,21 @@ class WriteActivity : AppCompatActivity() {
                 .show()
         }
 
-        binding.writeImgAdd1.setOnClickListener { selectImage1() }
-        binding.writeImgAdd2.setOnClickListener { selectImage2() }
+        binding.writeImgAdd1.setOnClickListener { selectImages() }
     }
 
-    var imgUri1 : Uri? = null
-    var imgUri2 : Uri? = null
-
-    private fun selectImage1() {
-        val intent = Intent(Intent.ACTION_PICK)
-        intent.type = "image/*"
-        resultLauncher1.launch(intent)
+    private fun selectImages() {
+        TedImagePicker.with(this)
+            .errorListener { message -> Log.e("ImagePickError", "message : $message") }
+            .cancelListener { Toast.makeText(this, "이미지 선택을 취소했습니다.", Toast.LENGTH_SHORT).show() }
+            .selectedUri(selectedUriList)
+            .startMultiImage { list : List<Uri> -> showMultiImage(list) }
     }
 
-    val resultLauncher1 : ActivityResultLauncher<Intent> = registerForActivityResult(ActivityResultContracts.StartActivityForResult(),
-        ActivityResultCallback { result ->
-        if (result.resultCode == RESULT_OK) {
-            imgUri1 = result.data!!.data!!
-            Glide.with(this).load(imgUri1).into(binding.writeImgAdd1)
-            Log.i("imgUri", imgUri1.toString())
-        } else return@ActivityResultCallback
-    })
-
-    private fun selectImage2() {
-        val intent = Intent(Intent.ACTION_PICK)
-        intent.type = "image/*"
-        resultLauncher2.launch(intent)
+    private fun showMultiImage(uriList : List<Uri>) {
+        selectedUriList = uriList
     }
 
-    val resultLauncher2 : ActivityResultLauncher<Intent> = registerForActivityResult(ActivityResultContracts.StartActivityForResult(),
-        ActivityResultCallback { result ->
-            if (result.resultCode == RESULT_OK) {
-                imgUri2 = result.data!!.data!!
-                Log.i("Uri", imgUri2.toString())
-                Glide.with(this).load(imgUri2).into(binding.writeImgAdd2)
-                Log.i("imgUri", imgUri2.toString())
-            } else return@ActivityResultCallback
-        })
-
-    lateinit var img01 : String
-    lateinit var img02 : String
     val firebaseAuth = FirebaseAuth.getInstance()
 
     private fun uploadReview() {
@@ -107,55 +84,6 @@ class WriteActivity : AppCompatActivity() {
         dataPart["content"] = content
         dataPart["rating"] = rating
         dataPart["user_id"] = user_id
-
-        if (imgUri1 != null) {
-            val sdf1 = SimpleDateFormat("yyyy-MM-dd-hh-mm-ss.SS")
-            val fileName1 = "IMG_${sdf1.format(Date())}-1.png"
-
-            var imgRef1 = firebaseStorage.getReference("uploads/$fileName1")
-            var uploadTask = imgRef1.putFile(imgUri1!!)
-            Log.i("imgUpload", "uploading")
-            uploadTask.addOnSuccessListener {
-                Log.i("upload", "upload success1")
-                val img1Ref = rootRef.child("uploads/$fileName1")
-                img1Ref.downloadUrl.addOnSuccessListener {
-                    img01 = it.toString()
-                    dataPart["img01"] = img01
-                }
-            }
-        }
-
-        if (imgUri2 != null) {
-            val sdf2 = SimpleDateFormat("yyyy-MM-dd-hh-mm-ss.SS")
-            val fileName2 = "IMG_${sdf2.format(Date())}-2.png"
-
-            var imgRef2 = firebaseStorage.getReference("uploads/$fileName2")
-            var uploadTask2 = imgRef2.putFile(imgUri2!!)
-            Log.i("imgUpload", "uploading")
-            uploadTask2.addOnSuccessListener {
-                Log.i("upload", "upload success2")
-                val img2Ref = rootRef.child("uploads/$fileName2")
-                img2Ref.downloadUrl.addOnSuccessListener {
-                    img02 = it.toString()
-                    dataPart["img02"] = img02
-                }
-            }
-        }
-
-        if (img01 != null || img02 != null) {
-            val retrofitService = RetrofitHelper.getScalarsInstance().create(RetrofitService::class.java)
-            val call = retrofitService.postReviewToServer(dataPart)
-            call.enqueue(object : Callback<String> {
-                override fun onResponse(call: Call<String>, response: Response<String>) {
-                    val s = response.body()
-                    Log.i("response", "" + s)
-                }
-
-                override fun onFailure(call: Call<String>, t: Throwable) {
-                    Toast.makeText(this@WriteActivity, "error" + t.message, Toast.LENGTH_SHORT).show()
-                }
-            })
-        }
     }
 
     override fun onSupportNavigateUp(): Boolean {
