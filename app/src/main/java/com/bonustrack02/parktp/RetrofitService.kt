@@ -4,13 +4,14 @@ import retrofit2.Call
 import retrofit2.http.*
 
 interface RetrofitService {
+    @Headers("Authorization: KakaoAK b96caaf968a0a761b94484d722357c7e")
     @GET("/v2/local/search/keyword.json")
-    fun getParkJson(@Header("Authorization") auth : String,
-                    @Query("query") query : String,
-                    @Query("x") x : String,
-                    @Query("y") y : String,
-                    @Query("radius") radius : String
-    ) : Call<ResponseItem>
+    fun getJson(
+        @Query("query") query: String,
+        @Query("x") x: String,
+        @Query("y") y: String,
+        @Query("radius") radius: String
+    ): Call<ResponseItem>
 
     @GET("/v2/local/search/keyword.json")
     fun getScalarsJson(@Header("Authorization") auth : String,
