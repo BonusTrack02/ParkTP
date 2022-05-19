@@ -106,7 +106,7 @@ class MapFragment : Fragment() {
                 }
                 markers.clear()
 
-                AddMarkersScalars()
+                loadDataAndAddMarkers()
             } else {
                 googleMap?.moveCamera(CameraUpdateFactory.newLatLngZoom(LatLng(lat, lng), 16f))
                 for (marker in markers) {
@@ -114,7 +114,7 @@ class MapFragment : Fragment() {
                 }
                 markers.clear()
 
-                AddMarkersScalars()
+                loadDataAndAddMarkers()
             }
             Toast.makeText(requireContext(), "callback", Toast.LENGTH_SHORT).show()
             val mainActivity = activity as MainActivity
@@ -128,7 +128,7 @@ class MapFragment : Fragment() {
         val kakaoKey = resources.getString(R.string.kakao_rest_key)
         Toast.makeText(requireContext(), "$lng", Toast.LENGTH_SHORT).show()
         Toast.makeText(requireContext(), "$lat", Toast.LENGTH_SHORT).show()
-        val call = retrofitService.getParkJson("KakaoAK $kakaoKey", "공원", "$lng", "$lat", "10000")
+        val call = retrofitService.getJson("공원", "$lng", "$lat", "10000")
         Log.i("latlng", "$lat  $lng")
         call.enqueue(object : Callback<ResponseItem> {
             override fun onResponse(call: Call<ResponseItem>, response: Response<ResponseItem>) {

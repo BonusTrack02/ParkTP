@@ -15,14 +15,13 @@ class SplashActivity : AppCompatActivity() {
 
     private val binding : ActivitySplashBinding by lazy { ActivitySplashBinding.inflate(layoutInflater) }
 
-    var permissions : Array<String> = arrayOf(Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.WRITE_EXTERNAL_STORAGE)
+    var permissions : Array<String> = arrayOf(Manifest.permission.ACCESS_FINE_LOCATION)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(binding.root)
 
-        if (checkSelfPermission(permissions[0]) == PackageManager.PERMISSION_DENIED
-            || checkSelfPermission(permissions[1]) == PackageManager.PERMISSION_DENIED) {
+        if (checkSelfPermission(permissions[0]) == PackageManager.PERMISSION_DENIED) {
             requestPermissions(permissions, 100)
         } else {
             handler.sendEmptyMessageDelayed(0, 2000)
