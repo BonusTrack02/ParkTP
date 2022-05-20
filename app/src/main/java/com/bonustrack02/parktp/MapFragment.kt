@@ -30,6 +30,7 @@ import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.Marker
 import com.google.android.gms.maps.model.MarkerOptions
 import com.google.gson.Gson
+import org.json.JSONObject
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -70,7 +71,7 @@ class MapFragment : Fragment() {
             tran.addToBackStack(null)
             tran.commit()
         }
-        loadDataAndAddMarkers()
+        AddMarkersScalars()
 
         mapFragment!!.getMapAsync { p0 ->
             googleMap = p0
@@ -106,7 +107,7 @@ class MapFragment : Fragment() {
                 }
                 markers.clear()
 
-                loadDataAndAddMarkers()
+                AddMarkersScalars()
             } else {
                 googleMap?.moveCamera(CameraUpdateFactory.newLatLngZoom(LatLng(lat, lng), 16f))
                 for (marker in markers) {
@@ -114,7 +115,7 @@ class MapFragment : Fragment() {
                 }
                 markers.clear()
 
-                loadDataAndAddMarkers()
+                AddMarkersScalars()
             }
             Toast.makeText(requireContext(), "callback", Toast.LENGTH_SHORT).show()
             val mainActivity = activity as MainActivity
@@ -172,6 +173,12 @@ class MapFragment : Fragment() {
                     responseItem = response.errorBody().toString()
                 } else {
                     responseItem = response.body()
+                    val responseObject = JSONObject(responseItem)
+                    val metaObject = responseObject.getJSONObject("meta")
+                    val count = metaObject.getInt("total_count")
+
+                    val docsArray  = responseObject.getJSONArray("documents")
+                    Log.i("parse", "${docsArray.length()} : $count")
                 }
 
                 val builder = AlertDialog.Builder(requireContext())
