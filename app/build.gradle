@@ -12,8 +12,8 @@ android {
         applicationId "com.bonustrack02.parktp"
         minSdk 23
         targetSdk 32
-        versionCode 10
-        versionName "1.4.e"
+        versionCode 11
+        versionName "1.4.f"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }

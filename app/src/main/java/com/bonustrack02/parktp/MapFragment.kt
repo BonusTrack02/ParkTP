@@ -63,13 +63,13 @@ class MapFragment : Fragment() {
 
         val ac = activity as MainActivity
         binding.fab.setOnClickListener {
-            val tran = ac.supportFragmentManager.beginTransaction()
-
-            var mapRecyclerFragment = MapRecyclerFragment()
-
-            tran.add(R.id.container, mapRecyclerFragment)
-            tran.addToBackStack(null)
-            tran.commit()
+//            val tran = ac.supportFragmentManager.beginTransaction()
+//
+//            var mapRecyclerFragment = MapRecyclerFragment()
+//
+//            tran.add(R.id.container, mapRecyclerFragment)
+//            tran.addToBackStack(null)
+//            tran.commit()
         }
         AddMarkersScalars()
 
@@ -117,7 +117,6 @@ class MapFragment : Fragment() {
 
                 AddMarkersScalars()
             }
-            Toast.makeText(requireContext(), "callback", Toast.LENGTH_SHORT).show()
             val mainActivity = activity as MainActivity
             mainActivity.providerClient.removeLocationUpdates(this)
         }
@@ -171,6 +170,7 @@ class MapFragment : Fragment() {
                 var responseItem : String?
                 if (response.body() == null) {
                     responseItem = response.errorBody().toString()
+                    Log.i("KakaoResponse Error", responseItem)
                 } else {
                     responseItem = response.body()
                     val responseObject = JSONObject(responseItem)
@@ -178,11 +178,19 @@ class MapFragment : Fragment() {
                     val count = metaObject.getInt("total_count")
 
                     val docsArray  = responseObject.getJSONArray("documents")
+                    for (i in 0 until docsArray.length()) {
+                        if (docsArray.getJSONObject(i).getString("category_name").contains("공원")) {
+                            markers.add(
+                                googleMap?.addMarker(MarkerOptions()
+                                    .title(docsArray.getJSONObject(i).getString("place_name"))
+                                    .position(LatLng(docsArray.getJSONObject(i).getString("y").toDouble(), docsArray.getJSONObject(i).getString("x").toDouble()))
+                                    .icon(BitmapDescriptorFactory.fromResource(R.drawable.ic_place2))
+                                    .anchor(0.5f, 1.5f))!!
+                            )
+                        }
+                    }
                     Log.i("parse", "${docsArray.length()} : $count")
                 }
-
-                val builder = AlertDialog.Builder(requireContext())
-                builder.setMessage("$responseItem").create().show()
             }
 
             override fun onFailure(call: Call<String>, t: Throwable) {
