@@ -59,7 +59,10 @@ class WriteActivity : AppCompatActivity() {
     private fun selectImages() {
         TedImagePicker.with(this)
             .errorListener { message -> Log.e("ImagePickError", "message : $message") }
-            .cancelListener { Toast.makeText(this, "이미지 선택을 취소했습니다.", Toast.LENGTH_SHORT).show() }
+            .cancelListener {
+                Toast.makeText(this, "이미지 선택을 취소했습니다.", Toast.LENGTH_SHORT).show()
+                Log.i("selectedUri" ,selectedUriList?.size.toString())
+            }
             .max(2, "최대 2장까지 선택가능합니다.")
             .selectedUri(selectedUriList)
             .startMultiImage { list : List<Uri> -> showMultiImage(list) }
@@ -81,44 +84,46 @@ class WriteActivity : AppCompatActivity() {
         val firebaseStorage = FirebaseStorage.getInstance()
 
         if (selectedUriList?.size == 1) {
-            val sdf = SimpleDateFormat("yyyyMMdd hh:mm:ss")
+            val sdf = SimpleDateFormat("yyyyMMdd hh:mm:ss:SS")
             val fileName = sdf.format(Date()) + ".png"
 
             val imgRef : StorageReference = firebaseStorage.getReference("uploads/$fileName")
 
             val uploadTask = imgRef.putFile(selectedUriList!![0])
             uploadTask.addOnSuccessListener {
-                val park_id = intent.getStringExtra("id")
-                val title = binding.editTitle.text.toString()
-                val content = binding.editContent.text.toString()
-                val rating = binding.ratingbar.rating.toString()
-                val user_id = "dummy@gmail.com" //firebaseAuth.currentUser?.email.toString()
+                imgRef.downloadUrl.addOnSuccessListener {
+                    val park_id = intent.getStringExtra("id")
+                    val title = binding.editTitle.text.toString()
+                    val content = binding.editContent.text.toString()
+                    val rating = binding.ratingbar.rating.toString()
+                    val user_id = "dummy@gmail.com" //firebaseAuth.currentUser?.email.toString()
 
-                val dataPart = HashMap<String, String>()
-                if (park_id != null) dataPart["park_id"] = park_id
-                dataPart["title"] = title
-                dataPart["content"] = content
-                dataPart["rating"] = rating
-                dataPart["user_id"] = user_id
+                    val dataPart = HashMap<String, String>()
+                    if (park_id != null) dataPart["park_id"] = park_id
+                    dataPart["title"] = title
+                    dataPart["content"] = content
+                    dataPart["rating"] = rating
+                    dataPart["user_id"] = user_id
+                    dataPart["img01"] = "$it"
 
-                val call = RetrofitHelper.getScalarsInstance().create(RetrofitService::class.java).postReviewToServer(dataPart).enqueue(
-                    object : Callback<String> {
-                        override fun onResponse(call: Call<String>, response: Response<String>) {
-                            val s = response.body()
-                            Log.i("php", "$s")
-                            Toast.makeText(this@WriteActivity, "$s", Toast.LENGTH_SHORT).show()
-                            finish()
+                    val call = RetrofitHelper.getScalarsInstance().create(RetrofitService::class.java).postReviewToServer(dataPart)
+                    call.enqueue(
+                        object : Callback<String> {
+                            override fun onResponse(call: Call<String>, response: Response<String>) {
+                                val s = response.body()
+                                Log.i("php", "$s")
+                                Toast.makeText(this@WriteActivity, "$s", Toast.LENGTH_SHORT).show()
+                                finish()
+                            }
+
+                            override fun onFailure(call: Call<String>, t: Throwable) {
+                                Log.e("php", "${t.message}")
+                            }
                         }
-
-                        override fun onFailure(call: Call<String>, t: Throwable) {
-                            Log.e("php", "${t.message}")
-                        }
-
-                    })
+                    )
+                }
             }
         }
-
-
     }
 
     override fun onSupportNavigateUp(): Boolean {
