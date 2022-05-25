@@ -16,7 +16,10 @@ import com.bonustrack02.parktp.databinding.ActivityWriteBinding
 import com.bumptech.glide.Glide
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.snackbar.Snackbar
+import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.storage.FirebaseStorage
+import com.google.firebase.storage.StorageReference
+import gun0912.tedimagepicker.builder.TedImagePicker
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -26,6 +29,7 @@ import kotlin.collections.HashMap
 
 class WriteActivity : AppCompatActivity() {
     val binding : ActivityWriteBinding by lazy { ActivityWriteBinding.inflate(layoutInflater) }
+    var selectedUriList : List<Uri>? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -41,102 +45,145 @@ class WriteActivity : AppCompatActivity() {
                 .setTitle("글 작성 확인")
                 .setMessage("이대로 업로드하시겠습니까?")
                 .setPositiveButton("예", DialogInterface.OnClickListener { dialogInterface, i ->
-                    if (imgUri1 == null && imgUri2 == null) {
-                        uploadReview()
-                    } else {
-                        uploadImages()
-                        uploadReview()
-                    }
+                    uploadReview()
                     finish()
                 })
                 .setNegativeButton("아니오", DialogInterface.OnClickListener { dialogInterface, i -> })
                 .show()
         }
 
-        binding.writeImgAdd1.setOnClickListener { selectImage1() }
-        binding.writeImgAdd2.setOnClickListener { selectImage2() }
+        binding.writeImgAdd1.setOnClickListener { selectImages() }
+        binding.writeImgAdd2.setOnClickListener { selectImages() }
     }
 
-    private fun selectImage1() {
-        val intent = Intent(Intent.ACTION_PICK)
-        intent.type = "image/*"
-        resultLauncher1.launch(intent)
+    private fun selectImages() {
+        TedImagePicker.with(this)
+            .errorListener { message -> Log.e("ImagePickError", "message : $message") }
+            .cancelListener {
+                Toast.makeText(this, "이미지 선택을 취소했습니다.", Toast.LENGTH_SHORT).show()
+                Log.i("selectedUri" ,selectedUriList?.size.toString())
+            }
+            .max(2, "최대 2장까지 선택가능합니다.")
+            .selectedUri(selectedUriList)
+            .startMultiImage { list : List<Uri> -> showMultiImage(list) }
     }
 
-    val resultLauncher1 : ActivityResultLauncher<Intent> = registerForActivityResult(ActivityResultContracts.StartActivityForResult(),
-        ActivityResultCallback { result ->
-        if (result.resultCode == RESULT_OK) {
-            imgUri1 = result.data!!.data!!
-            Glide.with(this).load(imgUri1).into(binding.writeImgAdd1)
-        } else return@ActivityResultCallback
-    })
-
-    private fun selectImage2() {
-        val intent = Intent(Intent.ACTION_PICK)
-        intent.type = "image/*"
-        resultLauncher2.launch(intent)
-    }
-
-    val resultLauncher2 : ActivityResultLauncher<Intent> = registerForActivityResult(ActivityResultContracts.StartActivityForResult(),
-        ActivityResultCallback { result ->
-            if (result.resultCode == RESULT_OK) {
-                imgUri2 = result.data!!.data!!
-                Log.i("Uri", imgUri2.toString())
-                Glide.with(this).load(imgUri2).into(binding.writeImgAdd2)
-            } else return@ActivityResultCallback
-        })
-
-    var imgUri1 : Uri? = null
-    var imgUri2 : Uri? = null
-
-    private fun uploadImages() {
-        val firebaseStorage = FirebaseStorage.getInstance()
-
-        val sdf1 = SimpleDateFormat("yyyy-MM-dd-hh-mm-ss.SS")
-        val fileName1 = "IMG_${sdf1.format(Date())}-1.png"
-
-        val sdf2 = SimpleDateFormat("yyyy-MM-dd-hh-mm-ss.SS")
-        val fileName2 = "IMG_${sdf2.format(Date())}-2.png"
-
-        var imgRef1 = firebaseStorage.getReference("uploads/$fileName1")
-        var imgRef2 = firebaseStorage.getReference("uploads/$fileName2")
-
-        var uploadTask = imgRef1.putFile(imgUri1!!)
-        uploadTask.addOnSuccessListener {
-            Log.i("upload", "upload success1")
-        }
-
-        var uploadTask2 = imgRef2.putFile(imgUri2!!)
-        uploadTask2.addOnSuccessListener {
-            Log.i("upload", "upload success2")
+    private fun showMultiImage(uriList : List<Uri>) {
+        selectedUriList = uriList
+        if (selectedUriList?.size == 1) {
+            Glide.with(this).load(selectedUriList!![0]).into(binding.writeImgAdd1)
+        } else if (selectedUriList?.size == 2) {
+            Glide.with(this).load(selectedUriList!![0]).into(binding.writeImgAdd1)
+            Glide.with(this).load(selectedUriList!![1]).into(binding.writeImgAdd2)
         }
     }
+
+    val firebaseAuth = FirebaseAuth.getInstance()
 
     private fun uploadReview() {
-        val id = intent.getStringExtra("id")
-        val title = binding.editTitle.text.toString()
-        val content = binding.editContent.text.toString()
-        val rating = binding.ratingbar.rating.toString()
+        val firebaseStorage = FirebaseStorage.getInstance()
 
-        val dataPart = HashMap<String, String>()
-        if (id != null) dataPart["id"] = id
-        dataPart["title"] = title
-        dataPart["content"] = content
-        dataPart["rating"] = rating
+        if (selectedUriList == null) {
+            val park_id = intent.getStringExtra("id")
+            val title = binding.editTitle.text.toString()
+            val content = binding.editContent.text.toString()
+            val rating = binding.ratingbar.rating.toString()
+            val user_id = "dummy@gmail.com" //firebaseAuth.currentUser?.email.toString()
 
-        val retrofitService = RetrofitHelper.getScalarsInstance().create(RetrofitService::class.java)
-        val call = retrofitService.postReviewToServer(dataPart)
-        call.enqueue(object : Callback<String> {
-            override fun onResponse(call: Call<String>, response: Response<String>) {
-                val s = response.body()
-                Log.i("response", "" + s)
+            val dataPart = HashMap<String, String>()
+            if (park_id != null) dataPart["park_id"] = park_id
+            dataPart["title"] = title
+            dataPart["content"] = content
+            dataPart["rating"] = rating
+            dataPart["user_id"] = user_id
+
+            uploadRetrofit(dataPart)
+        } else if (selectedUriList?.size == 1) {
+            val sdf = SimpleDateFormat("yyyyMMdd hh:mm:ss.SS")
+            val fileName = sdf.format(Date()) + ".png"
+
+            val imgRef : StorageReference = firebaseStorage.getReference("uploads/$fileName")
+
+            val uploadTask = imgRef.putFile(selectedUriList!![0])
+            uploadTask.addOnSuccessListener {
+                imgRef.downloadUrl.addOnSuccessListener {
+                    val park_id = intent.getStringExtra("id")
+                    val title = binding.editTitle.text.toString()
+                    val content = binding.editContent.text.toString()
+                    val rating = binding.ratingbar.rating.toString()
+                    val user_id = "dummy@gmail.com" //firebaseAuth.currentUser?.email.toString()
+
+                    val dataPart = HashMap<String, String>()
+                    if (park_id != null) dataPart["park_id"] = park_id
+                    dataPart["title"] = title
+                    dataPart["content"] = content
+                    dataPart["rating"] = rating
+                    dataPart["user_id"] = user_id
+                    dataPart["img01"] = "$it"
+
+                    uploadRetrofit(dataPart)
+                }
             }
+        } else if (selectedUriList?.size == 2) {
+            val sdf = SimpleDateFormat("yyyyMMdd hh:mm:ss.SS")
+            val file1Name = sdf.format(Date()) + ".png"
+            val file2Name = sdf.format(Date()) + ".png"
 
-            override fun onFailure(call: Call<String>, t: Throwable) {
-                Toast.makeText(this@WriteActivity, "error" + t.message, Toast.LENGTH_SHORT).show()
+            val imgRef1 : StorageReference = firebaseStorage.getReference("uploads/$file1Name")
+            val imgRef2 : StorageReference = firebaseStorage.getReference("uploads/$file2Name")
+
+            var img01 = ""
+            var img02 = ""
+
+            val uploadTask = imgRef1.putFile(selectedUriList!![0])
+            uploadTask.addOnSuccessListener {
+                imgRef1.downloadUrl.addOnSuccessListener { uri1 ->
+                    img01 = "$uri1"
+
+                    val uploadTask2 = imgRef2.putFile(selectedUriList!![1])
+                    uploadTask2.addOnSuccessListener {
+                        imgRef2.downloadUrl.addOnSuccessListener { uri2 ->
+                            img02 = "$uri2"
+
+                            val park_id = intent.getStringExtra("id")
+                            val title = binding.editTitle.text.toString()
+                            val content = binding.editContent.text.toString()
+                            val rating = binding.ratingbar.rating.toString()
+                            val user_id = "dummy@gmail.com" //firebaseAuth.currentUser?.email.toString()
+
+                            val dataPart = HashMap<String, String>()
+                            if (park_id != null) dataPart["park_id"] = park_id
+                            dataPart["title"] = title
+                            dataPart["content"] = content
+                            dataPart["rating"] = rating
+                            dataPart["user_id"] = user_id
+                            dataPart["img01"] = img01
+                            dataPart["img02"] = img02
+
+                            uploadRetrofit(dataPart)
+                        }
+                    }
+                }
             }
+        }
+    }
 
-        })
+    private fun uploadRetrofit(dataPart : HashMap<String, String>) {
+        val call = RetrofitHelper.getScalarsInstance().create(RetrofitService::class.java).postReviewToServer(dataPart)
+        call.enqueue(
+            object : Callback<String> {
+                override fun onResponse(call: Call<String>, response: Response<String>) {
+                    val s = response.body()
+                    Log.i("php", "$s")
+                    Toast.makeText(this@WriteActivity, "$s", Toast.LENGTH_SHORT).show()
+                    finish()
+                }
+
+                override fun onFailure(call: Call<String>, t: Throwable) {
+                    Log.e("php", "${t.message}")
+                }
+            }
+        )
     }
 
     override fun onSupportNavigateUp(): Boolean {

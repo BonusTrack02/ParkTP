@@ -22,5 +22,13 @@ class RetrofitHelper {
 
             return builder.build()
         }
+
+        fun getScalarsInstanceForTest() : Retrofit {
+            val builder = Retrofit.Builder()
+            builder.baseUrl("https://dapi.kakao.com")
+            builder.addConverterFactory(ScalarsConverterFactory.create())
+
+            return builder.build()
+        }
     }
 }

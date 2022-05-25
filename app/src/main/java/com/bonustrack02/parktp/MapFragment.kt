@@ -13,6 +13,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
+import androidx.appcompat.app.AlertDialog
 import androidx.core.app.ActivityCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
@@ -28,6 +29,8 @@ import com.google.android.gms.maps.model.BitmapDescriptorFactory
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.Marker
 import com.google.android.gms.maps.model.MarkerOptions
+import com.google.gson.Gson
+import org.json.JSONObject
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -68,7 +71,7 @@ class MapFragment : Fragment() {
             tran.addToBackStack(null)
             tran.commit()
         }
-        loadDataAndAddMarkers()
+        AddMarkersScalars()
 
         mapFragment!!.getMapAsync { p0 ->
             googleMap = p0
@@ -104,7 +107,7 @@ class MapFragment : Fragment() {
                 }
                 markers.clear()
 
-                loadDataAndAddMarkers()
+                AddMarkersScalars()
             } else {
                 googleMap?.moveCamera(CameraUpdateFactory.newLatLngZoom(LatLng(lat, lng), 16f))
                 for (marker in markers) {
@@ -112,8 +115,10 @@ class MapFragment : Fragment() {
                 }
                 markers.clear()
 
-                loadDataAndAddMarkers()
+                AddMarkersScalars()
             }
+            val mainActivity = activity as MainActivity
+            mainActivity.providerClient.removeLocationUpdates(this)
         }
     }
 
@@ -121,7 +126,9 @@ class MapFragment : Fragment() {
         val retrofit = RetrofitHelper.getInstance()
         val retrofitService = retrofit.create(RetrofitService::class.java)
         val kakaoKey = resources.getString(R.string.kakao_rest_key)
-        val call = retrofitService.getParkJson("KakaoAK $kakaoKey", "공원", "$lng", "$lat", "10000")
+        Toast.makeText(requireContext(), "$lng", Toast.LENGTH_SHORT).show()
+        Toast.makeText(requireContext(), "$lat", Toast.LENGTH_SHORT).show()
+        val call = retrofitService.getJson("공원", "$lng", "$lat", "10000")
         Log.i("latlng", "$lat  $lng")
         call.enqueue(object : Callback<ResponseItem> {
             override fun onResponse(call: Call<ResponseItem>, response: Response<ResponseItem>) {
@@ -151,6 +158,73 @@ class MapFragment : Fragment() {
                 Log.e("Retrofit error", t.message.toString())
             }
         })
+    }
+
+    private fun AddMarkersScalars() {
+        val retrofit = RetrofitHelper.getScalarsInstanceForTest()
+        val retrofitService = retrofit.create(RetrofitService::class.java)
+        val kakaoKey = resources.getString(R.string.kakao_rest_key)
+        val call = retrofitService.getScalarsJson("KakaoAK $kakaoKey", "공원", "$lng", "$lat", "10000")
+        call.enqueue(object : Callback<String> {
+            override fun onResponse(call: Call<String>, response: Response<String>) {
+                var responseString : String?
+                if (response.body() == null) {
+                    responseString = response.errorBody().toString()
+                    Log.i("KakaoResponse Error", responseString)
+                } else {
+                    responseString = response.body()
+                    val responseObject = JSONObject(responseString)
+                    val metaObject = responseObject.getJSONObject("meta")
+                    val count = metaObject.getInt("total_count")
+
+                    val docsArray  = responseObject.getJSONArray("documents")
+
+                    var metaClass = MetaClass(
+                        metaObject.getInt("pageable_count"),
+                        metaObject.getInt("total_count"),
+                        metaObject.getBoolean("is_end")
+                    )
+
+                    var docs = mutableListOf<Item>()
+                    for (i in 0 until docsArray.length()) {
+                        docs.add(Item(
+                            docsArray.getJSONObject(i).getString("place_name"),
+                            docsArray.getJSONObject(i).getString("distance"),
+                            docsArray.getJSONObject(i).getString("place_url"),
+                            docsArray.getJSONObject(i).getString("category_name"),
+                            docsArray.getJSONObject(i).getString("address_name"),
+                            docsArray.getJSONObject(i).getString("road_address_name"),
+                            docsArray.getJSONObject(i).getString("id"),
+                            docsArray.getJSONObject(i).getString("phone"),
+                            docsArray.getJSONObject(i).getString("category_group_name"),
+                            docsArray.getJSONObject(i).getString("x"),
+                            docsArray.getJSONObject(i).getString("y")
+                        ))
+                    }
+
+                    this@MapFragment.responseItem = ResponseItem(metaClass, docs)
+
+                    for (i in 0 until docsArray.length()) {
+                        if (docsArray.getJSONObject(i).getString("category_name").contains("공원")) {
+                            markers.add(
+                                googleMap?.addMarker(MarkerOptions()
+                                    .title(docsArray.getJSONObject(i).getString("place_name"))
+                                    .position(LatLng(docsArray.getJSONObject(i).getString("y").toDouble(), docsArray.getJSONObject(i).getString("x").toDouble()))
+                                    .icon(BitmapDescriptorFactory.fromResource(R.drawable.ic_place2))
+                                    .anchor(0.5f, 1.5f))!!
+                            )
+                        }
+                    }
+                    Log.i("parse", "${docsArray.length()} : $count")
+                }
+            }
+
+            override fun onFailure(call: Call<String>, t: Throwable) {
+                Toast.makeText(requireContext(), t.message, Toast.LENGTH_SHORT).show()
+            }
+
+        })
+
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
