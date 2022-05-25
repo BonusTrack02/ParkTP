@@ -63,13 +63,13 @@ class MapFragment : Fragment() {
 
         val ac = activity as MainActivity
         binding.fab.setOnClickListener {
-//            val tran = ac.supportFragmentManager.beginTransaction()
-//
-//            var mapRecyclerFragment = MapRecyclerFragment()
-//
-//            tran.add(R.id.container, mapRecyclerFragment)
-//            tran.addToBackStack(null)
-//            tran.commit()
+            val tran = ac.supportFragmentManager.beginTransaction()
+
+            var mapRecyclerFragment = MapRecyclerFragment()
+
+            tran.add(R.id.container, mapRecyclerFragment)
+            tran.addToBackStack(null)
+            tran.commit()
         }
         AddMarkersScalars()
 
@@ -167,17 +167,43 @@ class MapFragment : Fragment() {
         val call = retrofitService.getScalarsJson("KakaoAK $kakaoKey", "공원", "$lng", "$lat", "10000")
         call.enqueue(object : Callback<String> {
             override fun onResponse(call: Call<String>, response: Response<String>) {
-                var responseItem : String?
+                var responseString : String?
                 if (response.body() == null) {
-                    responseItem = response.errorBody().toString()
-                    Log.i("KakaoResponse Error", responseItem)
+                    responseString = response.errorBody().toString()
+                    Log.i("KakaoResponse Error", responseString)
                 } else {
-                    responseItem = response.body()
-                    val responseObject = JSONObject(responseItem)
+                    responseString = response.body()
+                    val responseObject = JSONObject(responseString)
                     val metaObject = responseObject.getJSONObject("meta")
                     val count = metaObject.getInt("total_count")
 
                     val docsArray  = responseObject.getJSONArray("documents")
+
+                    var metaClass = MetaClass(
+                        metaObject.getInt("pageable_count"),
+                        metaObject.getInt("total_count"),
+                        metaObject.getBoolean("is_end")
+                    )
+
+                    var docs = mutableListOf<Item>()
+                    for (i in 0 until docsArray.length()) {
+                        docs.add(Item(
+                            docsArray.getJSONObject(i).getString("place_name"),
+                            docsArray.getJSONObject(i).getString("distance"),
+                            docsArray.getJSONObject(i).getString("place_url"),
+                            docsArray.getJSONObject(i).getString("category_name"),
+                            docsArray.getJSONObject(i).getString("address_name"),
+                            docsArray.getJSONObject(i).getString("road_address_name"),
+                            docsArray.getJSONObject(i).getString("id"),
+                            docsArray.getJSONObject(i).getString("phone"),
+                            docsArray.getJSONObject(i).getString("category_group_name"),
+                            docsArray.getJSONObject(i).getString("x"),
+                            docsArray.getJSONObject(i).getString("y")
+                        ))
+                    }
+
+                    this@MapFragment.responseItem = ResponseItem(metaClass, docs)
+
                     for (i in 0 until docsArray.length()) {
                         if (docsArray.getJSONObject(i).getString("category_name").contains("공원")) {
                             markers.add(
