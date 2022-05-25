@@ -83,8 +83,23 @@ class WriteActivity : AppCompatActivity() {
     private fun uploadReview() {
         val firebaseStorage = FirebaseStorage.getInstance()
 
-        if (selectedUriList?.size == 1) {
-            val sdf = SimpleDateFormat("yyyyMMdd hh:mm:ss:SS")
+        if (selectedUriList == null) {
+            val park_id = intent.getStringExtra("id")
+            val title = binding.editTitle.text.toString()
+            val content = binding.editContent.text.toString()
+            val rating = binding.ratingbar.rating.toString()
+            val user_id = "dummy@gmail.com" //firebaseAuth.currentUser?.email.toString()
+
+            val dataPart = HashMap<String, String>()
+            if (park_id != null) dataPart["park_id"] = park_id
+            dataPart["title"] = title
+            dataPart["content"] = content
+            dataPart["rating"] = rating
+            dataPart["user_id"] = user_id
+
+            uploadRetrofit(dataPart)
+        } else if (selectedUriList?.size == 1) {
+            val sdf = SimpleDateFormat("yyyyMMdd hh:mm:ss.SS")
             val fileName = sdf.format(Date()) + ".png"
 
             val imgRef : StorageReference = firebaseStorage.getReference("uploads/$fileName")
@@ -106,24 +121,69 @@ class WriteActivity : AppCompatActivity() {
                     dataPart["user_id"] = user_id
                     dataPart["img01"] = "$it"
 
-                    val call = RetrofitHelper.getScalarsInstance().create(RetrofitService::class.java).postReviewToServer(dataPart)
-                    call.enqueue(
-                        object : Callback<String> {
-                            override fun onResponse(call: Call<String>, response: Response<String>) {
-                                val s = response.body()
-                                Log.i("php", "$s")
-                                Toast.makeText(this@WriteActivity, "$s", Toast.LENGTH_SHORT).show()
-                                finish()
-                            }
+                    uploadRetrofit(dataPart)
+                }
+            }
+        } else if (selectedUriList?.size == 2) {
+            val sdf = SimpleDateFormat("yyyyMMdd hh:mm:ss.SS")
+            val file1Name = sdf.format(Date()) + ".png"
+            val file2Name = sdf.format(Date()) + ".png"
 
-                            override fun onFailure(call: Call<String>, t: Throwable) {
-                                Log.e("php", "${t.message}")
-                            }
+            val imgRef1 : StorageReference = firebaseStorage.getReference("uploads/$file1Name")
+            val imgRef2 : StorageReference = firebaseStorage.getReference("uploads/$file2Name")
+
+            var img01 = ""
+            var img02 = ""
+
+            val uploadTask = imgRef1.putFile(selectedUriList!![0])
+            uploadTask.addOnSuccessListener {
+                imgRef1.downloadUrl.addOnSuccessListener { uri1 ->
+                    img01 = "$uri1"
+
+                    val uploadTask2 = imgRef2.putFile(selectedUriList!![1])
+                    uploadTask2.addOnSuccessListener {
+                        imgRef2.downloadUrl.addOnSuccessListener { uri2 ->
+                            img02 = "$uri2"
+
+                            val park_id = intent.getStringExtra("id")
+                            val title = binding.editTitle.text.toString()
+                            val content = binding.editContent.text.toString()
+                            val rating = binding.ratingbar.rating.toString()
+                            val user_id = "dummy@gmail.com" //firebaseAuth.currentUser?.email.toString()
+
+                            val dataPart = HashMap<String, String>()
+                            if (park_id != null) dataPart["park_id"] = park_id
+                            dataPart["title"] = title
+                            dataPart["content"] = content
+                            dataPart["rating"] = rating
+                            dataPart["user_id"] = user_id
+                            dataPart["img01"] = img01
+                            dataPart["img02"] = img02
+
+                            uploadRetrofit(dataPart)
                         }
-                    )
+                    }
                 }
             }
         }
+    }
+
+    private fun uploadRetrofit(dataPart : HashMap<String, String>) {
+        val call = RetrofitHelper.getScalarsInstance().create(RetrofitService::class.java).postReviewToServer(dataPart)
+        call.enqueue(
+            object : Callback<String> {
+                override fun onResponse(call: Call<String>, response: Response<String>) {
+                    val s = response.body()
+                    Log.i("php", "$s")
+                    Toast.makeText(this@WriteActivity, "$s", Toast.LENGTH_SHORT).show()
+                    finish()
+                }
+
+                override fun onFailure(call: Call<String>, t: Throwable) {
+                    Log.e("php", "${t.message}")
+                }
+            }
+        )
     }
 
     override fun onSupportNavigateUp(): Boolean {
