@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="100dp"
+    android:padding="4dp">
+
+    <de.hdodenhof.circleimageview.CircleImageView
+        android:id="@+id/review_img_profile"
+        android:layout_width="24dp"
+        android:layout_height="24dp"
+        android:src="@drawable/ic_account_circle_24"/>
+
+    <com.google.android.material.textview.MaterialTextView
+        android:id="@+id/review_text_id"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_toRightOf="@+id/review_img_profile"
+        android:layout_marginLeft="4dp"
+        android:text="dummy@gmail.com"/>
+
+</RelativeLayout>
