@@ -72,4 +72,5 @@ dependencies {
     implementation 'com.akexorcist:round-corner-progress-bar:2.1.2'
     implementation 'com.kakao.adfit:ads-base:3.12.4'
     implementation 'io.github.ParkSangGwon:tedimagepicker:1.2.8'
+    implementation "com.kakao.sdk:v2-user:2.10.0"
 }

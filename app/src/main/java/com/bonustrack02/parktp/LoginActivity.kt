@@ -3,6 +3,7 @@ package com.bonustrack02.parktp
 import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.widget.Toast
 import androidx.activity.result.ActivityResult
 import androidx.activity.result.ActivityResultCallback
 import androidx.activity.result.ActivityResultLauncher
@@ -14,6 +15,8 @@ import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.android.gms.tasks.Task
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
+import com.kakao.sdk.auth.model.OAuthToken
+import com.kakao.sdk.user.UserApiClient
 
 class LoginActivity : AppCompatActivity() {
 
@@ -38,9 +41,42 @@ class LoginActivity : AppCompatActivity() {
             startActivity(intent)
             finish()
         }
+
+        binding.loginBtnKakao.setOnClickListener {
+            clickKakao()
+        }
     }
 
-    fun clickGoogle() {
+    private fun clickKakao() {
+
+        val callback : (OAuthToken?, Throwable?) -> Unit = { token, error ->
+            if (error != null) {
+                Toast.makeText(this, "카카오 로그인 실패", Toast.LENGTH_SHORT).show()
+            } else {
+                Toast.makeText(this, "카카오 로그인 성공", Toast.LENGTH_SHORT).show()
+
+                UserApiClient.instance.me { user, error ->
+                    if (user != null) {
+                        var id = user.id.toString()
+                        var email = user.kakaoAccount?.email ?: ""
+
+                        G.user = User(id, email)
+
+                        startActivity(Intent(this, MainActivity::class.java))
+                        finish()
+                    }
+                }
+            }
+        }
+
+        if (UserApiClient.instance.isKakaoTalkLoginAvailable(this)) {
+            UserApiClient.instance.loginWithKakaoTalk(this, callback = callback)
+        } else {
+            UserApiClient.instance.loginWithKakaoAccount(this, callback = callback)
+        }
+    }
+
+    private fun clickGoogle() {
         val idToken = getString(R.string.google_id_token)
         val signInOptions = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
             .requestIdToken(idToken)
