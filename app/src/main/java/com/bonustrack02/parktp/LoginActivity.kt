@@ -17,6 +17,11 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import com.kakao.sdk.auth.model.OAuthToken
 import com.kakao.sdk.user.UserApiClient
+import com.navercorp.nid.NaverIdLoginSDK
+import com.navercorp.nid.oauth.OAuthLoginCallback
+import retrofit2.Call
+import retrofit2.Callback
+import retrofit2.Response
 
 class LoginActivity : AppCompatActivity() {
 
@@ -45,6 +50,55 @@ class LoginActivity : AppCompatActivity() {
         binding.loginBtnKakao.setOnClickListener {
             clickKakao()
         }
+
+        binding.loginBtnNaver.setOnClickListener {
+            clickNaver()
+        }
+    }
+
+    private fun clickNaver() {
+        val clientId = resources.getString(R.string.naver_client_id)
+        val clientSecret = resources.getString(R.string.naver_client_secret)
+        NaverIdLoginSDK.initialize(this, clientId, clientSecret, "산책할 공원 어디?")
+
+        NaverIdLoginSDK.authenticate(this, object : OAuthLoginCallback {
+            override fun onError(errorCode: Int, message: String) {
+                Toast.makeText(this@LoginActivity, "서버 에러 : $message", Toast.LENGTH_SHORT).show()
+            }
+
+            override fun onFailure(httpStatus: Int, message: String) {
+                Toast.makeText(this@LoginActivity, "네이버 로그인 실패 : $message", Toast.LENGTH_SHORT).show()
+            }
+
+            override fun onSuccess() {
+                Toast.makeText(this@LoginActivity, "네이버 로그인 성공", Toast.LENGTH_SHORT).show()
+
+                val accessToken = NaverIdLoginSDK.getAccessToken()
+
+                val retrofit = RetrofitHelper.getInstance("https://openapi.naver.com")
+                    .create(RetrofitService::class.java)
+                    .getNaverIdUserInfo("Bearer $accessToken")
+                    .enqueue(object : Callback<NaverUserInfoResponse> {
+                        override fun onResponse(
+                            call: Call<NaverUserInfoResponse>,
+                            response: Response<NaverUserInfoResponse>
+                        ) {
+                            val userInfo = response.body()
+                            val id = userInfo?.response?.id ?: ""
+                            val email = userInfo?.response?.email ?: ""
+                            Toast.makeText(this@LoginActivity, "$email", Toast.LENGTH_SHORT).show()
+                            G.user = User(id, email)
+
+                            startActivity(Intent(this@LoginActivity, MainActivity::class.java))
+                            finish()
+                        }
+
+                        override fun onFailure(call: Call<NaverUserInfoResponse>, t: Throwable) {
+                            Toast.makeText(this@LoginActivity, "회원정보 가져오기 실패", Toast.LENGTH_SHORT).show()
+                        }
+                    })
+            }
+        })
     }
 
     private fun clickKakao() {

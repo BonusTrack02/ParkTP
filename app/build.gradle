@@ -73,4 +73,5 @@ dependencies {
     implementation 'com.kakao.adfit:ads-base:3.12.4'
     implementation 'io.github.ParkSangGwon:tedimagepicker:1.2.8'
     implementation "com.kakao.sdk:v2-user:2.10.0"
+    implementation 'com.navercorp.nid:oauth:5.1.0'
 }

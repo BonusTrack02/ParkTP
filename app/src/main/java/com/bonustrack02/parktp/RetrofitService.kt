@@ -23,4 +23,7 @@ interface RetrofitService {
     @Multipart
     @POST("/ParkTP/uploadReview.php")
     fun postReviewToServer(@PartMap dataPart : Map<String, String>) : Call<String>
+
+    @GET("v1/nid/me")
+    fun getNaverIdUserInfo(@Header("Authorization") authorization : String) : Call<NaverUserInfoResponse>
 }

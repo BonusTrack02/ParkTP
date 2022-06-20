@@ -123,7 +123,7 @@ class MapFragment : Fragment() {
     }
 
     private fun loadDataAndAddMarkers() {
-        val retrofit = RetrofitHelper.getInstance()
+        val retrofit = RetrofitHelper.getInstance("https://dapi.kakao.com")
         val retrofitService = retrofit.create(RetrofitService::class.java)
         val kakaoKey = resources.getString(R.string.kakao_rest_key)
         Toast.makeText(requireContext(), "$lng", Toast.LENGTH_SHORT).show()
